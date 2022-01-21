@@ -1,9 +1,7 @@
 // Based on code from https://github.com/7185/lemuria/blob/dev/src/app/world/object.service.ts
-
-import {forkJoin, Subject} from 'rxjs'
-import { Group, Mesh, BufferAttribute, BufferGeometry, LoadingManager, MeshBasicMaterial,
-  CanvasTexture, TextureLoader, sRGBEncoding, VideoTexture } from 'three';
-import {MeshPhongMaterial, Object3D} from 'three'
+import { forkJoin, Subject } from 'rxjs'
+import { Group, Mesh, BufferAttribute, BufferGeometry, LoadingManager, MeshBasicMaterial, CanvasTexture, TextureLoader, sRGBEncoding } from 'three';
+import { MeshPhongMaterial, Object3D } from 'three'
 import BasicLights from './Lights';
 import RWXLoader, { RWXMaterial, RWXMaterialManager, LightSampling, GeometrySampling, TextureMode, MaterialMode } from 'three-rwx-loader';
 import { AWActionParser } from 'aw-action-parser';
@@ -12,11 +10,8 @@ import JSZipUtils from 'jszip-utils'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 
 export default class MainScene extends Group {
-
-
   constructor(controls) {
     super();
-
     const lights = new BasicLights();
     const parser = new AWActionParser();
     var name = "zjuke"
@@ -68,15 +63,10 @@ export default class MainScene extends Group {
     const rwxMaterialManager = new RWXMaterialManager("./path/textures", 'jpg', 'zip', JSZip, JSZipUtils, true, sRGBEncoding);
     const promises = []
     item.traverse((child) => {
-
-
-
       if (child instanceof Mesh) {
         const newMaterials = []
         child.material.forEach((m) => {
-
           if (m.userData.rwx.material != null) {
-
             const newRWXMat = m.userData.rwx.material.clone()
             newRWXMat.texture = textureName
             newRWXMat.mask = maskName
@@ -91,7 +81,7 @@ export default class MainScene extends Group {
           if (m.alphaMap != null) {
             m.alphaMap.dispose()
           }
-          if (m.map !=null) {
+          if (m.map != null) {
             m.map.dispose()
           }
           m.dispose()
@@ -103,6 +93,7 @@ export default class MainScene extends Group {
     rwxMaterialManager.resetCurrentMaterialList()
     return forkJoin(promises)
   }
+
   update(timeStamp) {
     //this.rotation.y = timeStamp / 2500; //Unnecessary with OrbitControls
   }

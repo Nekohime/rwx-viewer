@@ -16,6 +16,5 @@ export default class BasicLights extends Group {
     point.intensity = 0.5;
 
     this.add(point, ambi, hemi, dir);
-
   }
 }

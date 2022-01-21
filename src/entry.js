@@ -1,15 +1,4 @@
-/**
- * entry.ts
- *
- * This is the first file loaded. It sets up the Renderer,
- * Scene and Camera. It also starts the render loop and
- * handles window resizes.
- *
- */
-
-import { WebGLRenderer, PerspectiveCamera,
-  Scene, Vector3
- } from 'three';
+import { WebGLRenderer, PerspectiveCamera, Scene, Vector3 } from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
 import MainScene from './objects/Scene';
@@ -23,19 +12,14 @@ const controls = new OrbitControls(camera, renderer.domElement)
 
 const seedScene = new MainScene(controls)
 
-// scene
 //scene.add(controls) //for TransformControls
 scene.add(seedScene)
 
-// camera
 camera.position.set(6,3,10);
-camera.lookAt(new Vector3(0,0,0)); //Disable with orbitcontrols enabled
-//controls.update()
-// renderer
+//camera.lookAt(new Vector3(0,0,0)); //Disable with orbitcontrols enabled
+
 renderer.setPixelRatio(window.devicePixelRatio)
 renderer.setClearColor(0x000044, 1) //0x7ec0ee
-
-
 
 window.addEventListener('keydown', function (event) {
     switch (event.code) {
@@ -52,27 +36,22 @@ window.addEventListener('keydown', function (event) {
     }
 })
 
-// render loop
+
 const onAnimationFrameHandler = (timeStamp) => {
   renderer.render(scene, camera);
   seedScene.update && seedScene.update(timeStamp);
   window.requestAnimationFrame(onAnimationFrameHandler);
-  //camera.position.set(0,0,5)
 }
 window.requestAnimationFrame(onAnimationFrameHandler);
 
-
-
-// resize
-const windowResizeHanlder = () => {
+const windowResizeHandler = () => {
   const { innerHeight, innerWidth } = window;
   renderer.setSize(innerWidth, innerHeight);
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
 }
-windowResizeHanlder();
-window.addEventListener('resize', windowResizeHanlder);
+windowResizeHandler();
+window.addEventListener('resize', windowResizeHandler);
 
-// dom
 document.body.style.margin = "0";
 document.body.appendChild( renderer.domElement );
