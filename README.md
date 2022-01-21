@@ -16,7 +16,7 @@ Present:
 
 Planned:
 
-* Activate, Move, Rotate, Scale, Sign, Picture, Opacity (not yet parsed)
+* Activate, Move, Rotate, Scale, Sign, Picture, Opacity (not yet parsed), Visible
 * Animated textures
 
 Maybe:

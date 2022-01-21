@@ -9,7 +9,7 @@
     "prebuild": "rimraf ./build && mkdir ./build"
   },
   "keywords": ["rwx", "3d", "rwx viewer"],
-  "author": "",
+  "author": "Nekohime",
   "license": "CC0-1.0",
   "devDependencies": {
     "@babel/core": "^7.14.3",
