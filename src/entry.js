@@ -7,13 +7,13 @@ const camera = new PerspectiveCamera()
 const renderer = new WebGLRenderer({antialias: true})
 renderer.outputEncoding = sRGBEncoding;
 
-new OrbitControls(camera, renderer.domElement)
-const seedScene = new MainScene()
 
-scene.add(seedScene)
-
+var controls = new OrbitControls(camera, renderer.domElement)
 camera.position.set(6,3,10);
 camera.lookAt(new Vector3(0,0,0));
+const seedScene = new MainScene(camera)
+
+scene.add(seedScene)
 
 renderer.setPixelRatio(window.devicePixelRatio)
 renderer.setClearColor(0x000044, 1) //0x7ec0ee

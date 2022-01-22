@@ -7,8 +7,9 @@ import BasicLights from './Lights';
 import MainObject from './Object';
 
 export default class MainScene extends Group {
-  constructor() {
+  constructor(camera) {
     super();
+    this.camera = camera
     this.json = require("../scene.json")
     this.lights = new BasicLights(this);
     this.object = new MainObject(this);
