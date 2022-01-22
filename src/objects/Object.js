@@ -38,8 +38,8 @@ export default class MainObject extends Group {
       rwx.rotation.set(MathUtils.degToRad(this.objectRotation[0]), MathUtils.degToRad(this.objectRotation[1]), MathUtils.degToRad(this.objectRotation[2]))
       rwx.scale.set(this.objectScale[0], this.objectScale[1], this.objectScale[1]) //This is not currently implemented in any universe tech, but is here because I think it would be pretty cool.
 
-      this.execActions(this, rwx)
       this.axisAlignment = rwx.userData.rwx.axisAlignment || 'none'
+      this.execActions(this, rwx)
       this.add(rwx);
     });
   }
@@ -95,7 +95,7 @@ execActions(item, rwx) {
         this.objectAppliedMove.time = cmd.time
       }
       if (cmd.commandType === 'scale') {
-        this.objectAppliedScale.factor = [1,1,1] //TODO: Implement properly once Scaling gets merged into aw-action-parser
+        this.objectAppliedScale.factor = cmd.factor //TODO: Implement properly once Scaling gets merged into aw-action-parser
       }
     }
   }
@@ -232,10 +232,14 @@ makeSign(item, rwx, color, bcolor) {
         this.position.z = this.objectAppliedMove.distance.z * (timeStamp / 120))
     }
     if (this.objectAppliedScale.factor) {
-      //rwx.scale.set(this.objectAppliedScale.factor.x, this.objectAppliedScale.factor.y, this.objectAppliedScale.factor.z) // Scripted Scaling
+      this.scale.set(this.objectAppliedScale.factor.x, this.objectAppliedScale.factor.y, this.objectAppliedScale.factor.z) // Scripted Scaling
+      //console.log(this.objectAppliedScale.factor.x, this.objectAppliedScale.factor.y, this.objectAppliedScale.factor.z)
     }
     if (this.axisAlignment !== 'none') {
-      this.quaternion.copy(this.scene.camera.quaternion)
+      // Couldn't find Lemuria's code for this. Or it didn't work with OrbitControls
+      this.rotation.y = Math.atan2(
+        (this.scene.camera.position.x - this.position.x),
+        (this.scene.camera.position.z - this.position.z));
     }
   }
 

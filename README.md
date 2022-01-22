@@ -14,11 +14,11 @@ For those pesky RWX Models. The ones that everyone forgot about.
 
 Present:
 
-* Create, Color, Texture, Move, Rotate, Sign, Visible (useless)
+* Create, Color, Texture, Sign, Move, Rotate, Scale, Visible
 
 Planned:
 
-* Activate, Scale\*, Picture, Opacity\*
+* Activate, Picture, Opacity\*
   * We have Scaling as Object Data but not as Action Commands, PR to `aw-action-parser` Pending
   * No Opacity in AWAP yet :-(
 * Animated Textures

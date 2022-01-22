@@ -4,8 +4,13 @@ import MainScene from './objects/Scene';
 
 const scene = new Scene()
 const camera = new PerspectiveCamera()
-const renderer = new WebGLRenderer({antialias: true})
+const renderer = new WebGLRenderer({
+  antialias: true, // smooth edges
+  alpha: false,    // transparent background
+  stencil: false
+})
 renderer.outputEncoding = sRGBEncoding;
+renderer.shadowMap.enabled = false
 
 
 var controls = new OrbitControls(camera, renderer.domElement)

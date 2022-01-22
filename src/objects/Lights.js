@@ -12,9 +12,9 @@ export default class BasicLights extends Group {
         dir.position.set(5, 1, 2);
         dir.target.position.set(0,0,0);
 
-        point.position.set(0, 1, 1);
+        point.position.set(1, 1, 1);
         point.intensity = 0.05;
 
-        this.add(point, ambi, hemi, dir)
+        this.add(point)//, ambi, hemi, dir)
   }
 }

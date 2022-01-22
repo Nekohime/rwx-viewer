@@ -26,7 +26,11 @@ export default class MainScene extends Group {
     })
 
     this.add(this.object);
-    this.add(this.lights);
+    //this.add(this.lights);
+      var light = new AmbientLight(0xFF00EC)
+      light.physicallyCorrectLights = true
+      light.position.z = 3
+      this.add(light)
   }
 
   update(timeStamp) {
