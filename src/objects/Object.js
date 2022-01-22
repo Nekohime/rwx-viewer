@@ -11,7 +11,7 @@ export default class MainObject extends Group {
   constructor(scene) {
     super();
     this.json = require("../object.json")
-
+    this.scene = scene
     this.model = this.json.model.endsWith(".rwx") ? this.json.model : this.json.model + ".rwx"
     this.description = this.json.description
     this.action = this.json.action;
@@ -24,6 +24,7 @@ export default class MainObject extends Group {
     this.objectRotation = this.json.rotation
     this.objectScale = this.json.scale; this.objectScale[0] = this.resolveScalingFactor(this.objectScale[0]); this.objectScale[1] = this.resolveScalingFactor(this.objectScale[1]); this.objectScale[2] = this.resolveScalingFactor(this.objectScale[2])
     this.rwxLoader = new RWXLoader();
+    this.curRWX = null
 
     this.path = scene.json.path.base
     this.path_models = this.path + scene.json.path.models
@@ -38,6 +39,7 @@ export default class MainObject extends Group {
       rwx.scale.set(this.objectScale[0], this.objectScale[1], this.objectScale[1]) //This is not currently implemented in any universe tech, but is here because I think it would be pretty cool.
 
       this.execActions(this, rwx)
+      this.axisAlignment = rwx.userData.rwx.axisAlignment || 'none'
       this.add(rwx);
     });
   }
@@ -232,7 +234,9 @@ makeSign(item, rwx, color, bcolor) {
     if (this.objectAppliedScale.factor) {
       //rwx.scale.set(this.objectAppliedScale.factor.x, this.objectAppliedScale.factor.y, this.objectAppliedScale.factor.z) // Scripted Scaling
     }
-    //var moveX = this.position.x + (this.distance.x || 0) * timeStamp / 10000
+    if (this.axisAlignment !== 'none') {
+      this.quaternion.copy(this.scene.camera.quaternion)
+    }
   }
 
   applyTexture(item, textureName, maskName, color) {
