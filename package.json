@@ -1,6 +1,6 @@
 {
   "name": "rwx-viewer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "For those pesky RWX Models. The ones that everyone forgot about.",
   "main": "entry.js",
   "scripts": {
@@ -26,7 +26,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "aw-action-parser": "^1.1.7",
+    "aw-action-parser": "^1.1.8",
     "jszip": "^3.7.1",
     "jszip-utils": "^0.1.0",
     "rxjs": "^7.5.2",
