@@ -3,3 +3,5 @@
 *.log*
 *.code-workspace
 /path
+scene.json
+object.json

@@ -5,23 +5,35 @@ For those pesky RWX Models. The ones that everyone forgot about.
 ## How to Use
 
 * Click around and scroll :)
-* Edit Scene.js to change the object and its properties
+* Rename or copy `./src/{scene, object}.example.json` to `./src/{scene, object}.json` to change the Scene and Object and their properties
+* Install dependencies with `npm install`
 * `npm run start` and have fun!
+  * You don't need to restart when changing configs or code, it does it automatically (and fast!)
 
 ## Features
 
 Present:
 
-* Create, Color, Texture
+* Create, Color, Texture, Move, Rotate, Sign, Visible (useless)
 
 Planned:
 
-* Activate, Move, Rotate, Scale, Sign, Picture, Opacity (not yet parsed), Visible
-* Animated textures
+* Activate, Scale\*, Picture, Opacity\*
+  * We have Scaling as Object Data but not as Action Commands, PR to `aw-action-parser` Pending
+  * No Opacity in AWAP yet :-(
+* Animated Textures
+* Scene Lighting (having some issues)
+  * Point, Spot, Ambient, Hemisphere
+  * Colours, Positions
+* Skybox, Fog
 
 Maybe:
 
 * Sound, Media, Shear
+
+Won't add:
+
+* Name, Teleport, etc.
 
 ## Licenses
 

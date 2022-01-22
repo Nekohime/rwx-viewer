@@ -1,32 +1,36 @@
 {
   "name": "rwx-viewer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "For those pesky RWX Models. The ones that everyone forgot about.",
   "main": "entry.js",
   "scripts": {
     "start": "webpack serve --mode development",
     "build": "webpack --mode development",
-    "prebuild": "rimraf ./build && mkdir ./build"
+    "lint": "./node_modules/.bin/eslint ./src/*.js && ./node_modules/.bin/eslint ./src/objects/*.js"
   },
-  "keywords": ["rwx", "3d", "rwx viewer"],
+  "keywords": [
+    "rwx",
+    "3d",
+    "rwx viewer"
+  ],
   "author": "Nekohime",
   "license": "CC0-1.0",
   "devDependencies": {
     "@babel/core": "^7.14.3",
-    "@babel/preset-env": "^7.14.4",
     "babel-loader": "^8.2.2",
+    "eslint": "^8.7.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.3.1",
-    "raw-loader": "^4.0.2",
-    "rimraf": "^3.0.2",
-    "webpack": "^5.38.1",
+    "webpack": "^5.67.0",
+    "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
     "aw-action-parser": "^1.1.7",
+    "jszip": "^3.7.1",
+    "jszip-utils": "^0.1.0",
     "rxjs": "^7.5.2",
     "three": "latest",
-    "three-rwx-loader": "^0.4.9",
-    "webpack-cli": "^4.7.2"
+    "three-rwx-loader": "^0.4.9"
   }
 }

@@ -11,17 +11,20 @@ module.exports = {
     path: path.join(__dirname, buildPath),
     filename: '[name].[hash].js'
   },
+  resolve: {
+    symlinks: true
+  },
   mode: 'development',
   target: 'web',
   devtool: 'source-map',
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.js?$/,
         use: 'babel-loader',
         exclude: path.resolve(__dirname, './node_modules/')
       },{
-        test: /\.(jpe?g|png|gif|svg|tga|glb|babylon|mtl|pcb|pcd|prwm|obj|mat|mp3|ogg)$/i,
+        test: /\.(jpe?g|png|gif|svg|tga|glb|babylon|mtl|pcb|pcd|prwm|mat|mp3|ogg)$/i,
         use: 'file-loader',
         exclude: path.resolve(__dirname, './node_modules/')
       }

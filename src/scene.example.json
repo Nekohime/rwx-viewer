@@ -1,0 +1,8 @@
+{
+  "path": {
+    "base": "./path/",
+    "models": "rwx",
+    "textures": "textures/"
+  },
+  "ground": "ground1.rwx"
+}
