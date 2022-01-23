@@ -20,17 +20,13 @@ export default class MainScene extends Group {
     this.path_textures = this.path + this.json.path.textures
     this.ground_model = this.json.ground.endsWith(".rwx") ? this.json.ground : this.json.ground + ".rwx"
 
-    this.groundLoader.setPath(this.path_models).setResourcePath(this.path_textures).setJSZip(JSZip, JSZipUtils).setWaitFullLoad(true).setFlatten(true).setUseBasicMaterial(true).setTextureEncoding(sRGBEncoding)
+    this.groundLoader.setPath(this.path_models).setResourcePath(this.path_textures).setJSZip(JSZip, JSZipUtils).setWaitFullLoad(true).setFlatten(true).setTextureEncoding(sRGBEncoding)//.setUseBasicMaterial(true)
     this.groundLoader.load(this.ground_model, (ground) => {
       this.add(ground)
     })
 
     this.add(this.object);
-    //this.add(this.lights);
-      var light = new AmbientLight(0xFF00EC)
-      light.physicallyCorrectLights = true
-      light.position.z = 3
-      this.add(light)
+    this.add(this.lights);
   }
 
   update(timeStamp) {

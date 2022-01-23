@@ -30,8 +30,8 @@ export default class MainObject extends Group {
     this.path_models = this.path + scene.json.path.models
     this.path_textures = this.path + scene.json.path.textures
 
-    this.rwxLoader.setPath(this.path_models).setResourcePath(this.path_textures).setJSZip(JSZip, JSZipUtils).setWaitFullLoad(true).setFlatten(true).setUseBasicMaterial(true).setTextureEncoding(sRGBEncoding)
-
+    this.rwxLoader.setPath(this.path_models).setResourcePath(this.path_textures).setJSZip(JSZip, JSZipUtils).setWaitFullLoad(true).setFlatten(true).setTextureEncoding(sRGBEncoding)//.setUseBasicMaterial(true)
+    //
     this.rwxLoader.load(this.model, (rwx) => {
       //Object Data
       rwx.position.set(this.objectPosition[0], this.objectPosition[1], this.objectPosition[2])
