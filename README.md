@@ -6,6 +6,7 @@ For those pesky RWX Models. The ones that everyone forgot about.
 
 * Click around and scroll :)
 * Rename or copy `./src/{scene, object}.example.json` to `./src/{scene, object}.json` to change the Scene and Object and their properties
+* `ln -s /path/to/object/path/ path`
 * Install dependencies with `npm install`
 * `npm run start` and have fun!
   * You don't need to restart when changing configs or code, it does it automatically (and fast!)
@@ -22,7 +23,7 @@ Planned:
   * We have Scaling as Object Data but not as Action Commands, PR to `aw-action-parser` Pending
   * No Opacity in AWAP yet :-(
 * Animated Textures
-* Scene Lighting (having some issues)
+* Scene Lighting (Works but unfinished)
   * Point, Spot, Ambient, Hemisphere
   * Colours, Positions
 * Skybox, Fog
