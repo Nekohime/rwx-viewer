@@ -19,9 +19,9 @@ Present:
 
 Planned:
 
-* Activate, Picture, Opacity\*
-  * We have Scaling as Object Data but not as Action Commands, PR to `aw-action-parser` Pending
+* Activate, Picture, Opacity\*, Media*
   * No Opacity in AWAP yet :-(
+  * Media in progress
 * Animated Textures
 * Scene Lighting (Works but unfinished)
   * Point, Spot, Ambient, Hemisphere
@@ -30,11 +30,7 @@ Planned:
 
 Maybe:
 
-* Sound, Media, Shear
-
-Won't add:
-
-* Name, Teleport, etc.
+* Shear
 
 ## Licenses
 
@@ -44,3 +40,6 @@ This project makes use of:
 * [three-rwx-loader (MIT)](https://github.com/Blaxar/three-rwx-loader)
 * [three-seed (MIT)](https://github.com/edwinwebb/three-seed/blob/master/LICENSE)
 * And code from [Lemuria (MIT)!](https://github.com/7185/lemuria)
+* [rxjs (Apache 2.0)](https://github.com/ReactiveX/rxjs/blob/master/LICENSE.txt)
+* [JSZip (MIT)](https://github.com/Stuk/jszip/blob/master/LICENSE.markdown)
+* [JSZip-utils (MIT)](https://github.com/Stuk/jszip-utils)

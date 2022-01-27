@@ -1,9 +1,9 @@
+/* eslint no-undef: 0 */
 const path = require('path');
-const pkg = require('./package.json');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const buildPath = './build/';
-var PACKAGE = require('./package.json');
-var title = "RWX Viewer v" + PACKAGE.version
+const PACKAGE = require('./package.json');
+const title = "RWX Viewer v" + PACKAGE.version;
 
 module.exports = {
   entry: ['./src/entry.js'],
@@ -33,4 +33,4 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({'title': title})
   ]
-}
+};
