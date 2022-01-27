@@ -1,4 +1,5 @@
 {
+  "strict": false,
   "path": {
     "base": "./path/",
     "models": "rwx",
