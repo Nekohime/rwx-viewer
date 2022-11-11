@@ -1,5 +1,5 @@
 import { WebGLRenderer, PerspectiveCamera, Scene, Vector3, sRGBEncoding } from 'three';
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import MainScene from './objects/Scene';
 
 const scene = new Scene();
@@ -39,5 +39,12 @@ const windowResizeHandler = () => {
 windowResizeHandler();
 window.addEventListener('resize', windowResizeHandler);
 
-document.body.style.margin = "0";
+let head = document.querySelector('head');
+let favicon = document.createElement('link'); //Stop favicon requests
+favicon.rel = 'icon';
+favicon.type = 'image/x-icon';
+favicon.href = 'data:,';
+head.appendChild(favicon);
+
+document.body.style.margin = '0';
 document.body.appendChild( renderer.domElement );

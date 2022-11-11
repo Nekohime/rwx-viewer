@@ -27,11 +27,11 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "aw-action-parser": "^1.1.8",
-    "jszip": "^3.7.1",
-    "jszip-utils": "^0.1.0",
-    "rxjs": "^7.5.2",
+    "aw-action-parser": "latest",
+    "jszip": "latest",
+    "jszip-utils": "latest",
+    "rxjs": "latest",
     "three": "latest",
-    "three-rwx-loader": "^0.4.13"
+    "three-rwx-loader": "latest"
   }
 }
