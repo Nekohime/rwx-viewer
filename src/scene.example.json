@@ -1,9 +1,9 @@
 {
   "strict": false,
   "path": {
-    "base": "./path/",
+    "base": "http://localhost/path/",
     "models": "rwx",
-    "textures": "textures/"
+    "textures": "textures"
   },
   "ground": "ground1.rwx"
 }

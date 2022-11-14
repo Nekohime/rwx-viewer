@@ -96,6 +96,11 @@ export default class MainObject extends Group {
                   if (cmd.commandType === 'picture') {
                       this.makePicture(rwx, cmd.resource)
                   }
+                  if (cmd.commandType === 'media') {
+                      this.makeMedia(rwx, cmd.resource);
+                      console.log("?")
+                  }
+
               }
               if (cmd.commandType === 'rotate') {
                   this.objectAppliedRotation.speed = cmd.speed;
@@ -130,6 +135,10 @@ export default class MainObject extends Group {
                   if (cmd.commandType === 'picture') {
                       this.makePicture(rwx, cmd.resource)
                   }
+                  if (cmd.commandType === 'media') {
+                      this.makeMedia(rwx, cmd.resource);
+                      console.log("?")
+                  }
               }
           })
       } else {
@@ -146,13 +155,7 @@ export default class MainObject extends Group {
   }
 
   makePicture(item, url) {
-      // TODO: Allow configuring proxy (or none at all)
-      /*if (url.match(this.remoteUrl)) {
-        url = `${config.url.imgProxy}${url}`
-      } else {
-        url = `${this.path}/textures/${url}`
-      }*/
-      url = `https:// images.weserv.nl/?url=${url}`;
+      url = `https://images.weserv.nl/?url=${url}`;
       this.pictureLoader = new TextureLoader();
       this.pictureLoader.load(url, (image) => {
           image.encoding = sRGBEncoding;
@@ -180,19 +183,20 @@ export default class MainObject extends Group {
       return div.firstChild;
   }
 
+  // tags: 100 = sign; 200 = picture
   makeMedia(item, url) { // Unfinished, but works
-      // tags: 100 = sign; 200 = picture
       const uid = Math.random().toString(36).substr(4, 12);
-      var videoHTML = `
-      <video id="video#${uid}" muted crossOrigin="anonymous" playsinline style="display:none">
-        <source src="${url}" type="video/webm">
+      //TODO: Clean this up.
+      let videoHTML = `
+      <video id="video#${uid}" crossOrigin="anonymous" playsinline style="display:none">
+        <source src="${url}" type="video/mp4">
       </video>`;
 
       document.body.appendChild(this.createElementFromHTML(videoHTML));
       const video = document.getElementById('video#' + uid); // as HTMLVideoElement;
-      // video.muted = false
-      video.play();
-      var videoTexture = new VideoTexture(video);
+       video.muted = false
+      //video.play();
+      let videoTexture = new VideoTexture(video);
       item.traverse((child) => {
           if (child instanceof Mesh) {
               const newMaterials = [];
@@ -218,6 +222,10 @@ export default class MainObject extends Group {
               child.material.needsUpdate = true;
           }
       });
+      let mediaPlayer = [];
+      mediaPlayer.videoTexture = videoTexture;
+      mediaPlayer.videoElement = video;
+      item.userData.mediaPlayer = mediaPlayer;
   }
 
   textCanvas(text, ratio = 1, color, bcolor) {
@@ -337,18 +345,20 @@ export default class MainObject extends Group {
       })
   }
 
-  update(timeStamp) {
+  update(delta) {
+
     if (this.objectAppliedRotation.speed != null) {
       this.rotation.set(
-        this.rotation.x = MathUtils.degToRad(this.objectAppliedRotation.speed.x * timeStamp / 120),
-        this.rotation.y = MathUtils.degToRad(this.objectAppliedRotation.speed.y * timeStamp / 120),
-        this.rotation.z = MathUtils.degToRad(this.objectAppliedRotation.speed.z * timeStamp / 120));
+        this.rotation.x += MathUtils.degToRad(this.objectAppliedRotation.speed.x * 6) * delta,
+        this.rotation.y += MathUtils.degToRad(this.objectAppliedRotation.speed.y * 6) * delta,
+        this.rotation.z += MathUtils.degToRad(this.objectAppliedRotation.speed.z * 6) * delta
+      );
     }
     if (this.objectAppliedMove.distance != null) {
       this.position.set(
-        this.position.x = this.objectAppliedMove.distance.x * (timeStamp / 120),
-        this.position.y = this.objectAppliedMove.distance.y * (timeStamp / 120),
-        this.position.z = this.objectAppliedMove.distance.z * (timeStamp / 120));
+        this.position.x += this.objectAppliedMove.distance.x * 6 * delta,
+        this.position.y += this.objectAppliedMove.distance.y * 6 * delta,
+        this.position.z += this.objectAppliedMove.distance.z * 6 * delta);
     }
     if (this.objectAppliedScale.factor) {
       this.scale.set(this.objectAppliedScale.factor.x, this.objectAppliedScale.factor.y, this.objectAppliedScale.factor.z); // Scripted Scaling

@@ -13,24 +13,26 @@ For those pesky RWX Models. The ones that everyone forgot about.
 
 ## Features
 
-Present:
+Implemented:
 
-* Create, Color, Texture, Sign, Move, Rotate, Scale, Visible
+* Create
+* Color, Texture, Picture, Sign, Move (moves forever), Rotate, Scale, Visible, Media (click to play/pause)
+* Ground
+* Environment (Partially)
+  * Lighting
 
 Planned:
 
-* Activate, Picture, Opacity\*, Media*
+* Activate, Opacity\*
   * No Opacity in AWAP yet :-(
-  * Media in progress
 * Animated Textures
-* Scene Lighting (Works but unfinished)
-  * Point, Spot, Ambient, Hemisphere
-  * Colours, Positions
-* Skybox, Fog
+* Skybox
 
 Maybe:
 
 * Shear
+* Terrain
+* Clouds, Fog
 
 ## Licenses
 

@@ -4,7 +4,7 @@
   "description": "For those pesky RWX Models. The ones that everyone forgot about.",
   "main": "entry.js",
   "scripts": {
-    "start": "webpack serve --mode development --port 5000",
+    "start": "webpack serve --mode development --host 0.0.0.0 --port 5000",
     "build": "webpack --mode development",
     "lint": "./node_modules/.bin/eslint ./src/*.js && ./node_modules/.bin/eslint ./src/objects/*.js && ./node_modules/.bin/eslint ./*.js"
   },

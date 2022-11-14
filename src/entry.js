@@ -1,4 +1,4 @@
-import { WebGLRenderer, PerspectiveCamera, Scene, Vector3, sRGBEncoding } from 'three';
+import { Clock, WebGLRenderer, PerspectiveCamera, Scene, Vector3, sRGBEncoding } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import MainScene from './objects/Scene';
 
@@ -17,19 +17,36 @@ new OrbitControls(camera, renderer.domElement);
 camera.position.set(6,3,10);
 camera.lookAt(new Vector3(0,0,0));
 const seedScene = new MainScene(camera);
-
+seedScene.init();
 scene.add(seedScene);
 
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setClearColor(0x000044, 1); //0x7ec0ee
 
+let clock = new Clock();
+let delta = 0;
+let interval = 1 / 120;
+
+function update() {
+  requestAnimationFrame(update);
+  delta += clock.getDelta();
+
+  if (delta > interval) {
+    renderer.render(scene, camera);
+    seedScene.update && seedScene.update(delta);
+    delta = delta & interval;
+  }
+}
+update();
+
+/*
 const onAnimationFrameHandler = (timeStamp) => {
   renderer.render(scene, camera);
   seedScene.update && seedScene.update(timeStamp);
   window.requestAnimationFrame(onAnimationFrameHandler);
 };
 window.requestAnimationFrame(onAnimationFrameHandler);
-
+*/
 const windowResizeHandler = () => {
   const { innerHeight, innerWidth } = window;
   renderer.setSize(innerWidth, innerHeight);
