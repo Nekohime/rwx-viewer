@@ -1,12 +1,13 @@
-import { Clock, WebGLRenderer, PerspectiveCamera, Scene, Vector3, sRGBEncoding } from 'three';
+import { Clock, WebGLRenderer, PerspectiveCamera, Scene, Vector3,
+  sRGBEncoding } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import MainScene from './objects/Scene';
 
 const scene = new Scene();
 const camera = new PerspectiveCamera();
 const renderer = new WebGLRenderer({
-  antialias: true, // smooth edges
-  alpha: false,    // transparent background
+  antialias: true,
+  alpha: false, //Transparent background
   stencil: false
 });
 renderer.outputEncoding = sRGBEncoding;

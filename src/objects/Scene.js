@@ -45,7 +45,7 @@ export default class MainScene extends Group {
       that.pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
     });
     window.addEventListener('pointerdown', function(event) {
-      const intersects = that.raycaster.intersectObjects(that.children)
+      const intersects = that.raycaster.intersectObjects(that.children);
       if (intersects[0]) {
         let mediaPlayer = intersects[0].object.userData.mediaPlayer;
         let videoTexture = mediaPlayer.videoTexture;
@@ -53,12 +53,12 @@ export default class MainScene extends Group {
         let source = video.querySelector('source');
 
         if (!video.paused)
-          video.pause()
+          video.pause();
         else
           video.play();
 
         console.log(source);
-        console.log(intersects[0].object.userData)
+        console.log(intersects[0].object.userData);
       }
       //for (let i = 0; i < intersects.length; i++) { console.log(intersects[i].object); }
     });

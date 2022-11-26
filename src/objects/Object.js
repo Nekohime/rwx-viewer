@@ -60,45 +60,44 @@ export default class MainObject extends Group {
 
   execActions(rwx) {
 
-      let textured = false
-      let texturing = null
-      const result = this.actionResult
-      //console.log(result)
+      let textured = false;
+      let texturing = null;
+      const result = this.actionResult;
+      //console.log(result);
       if (result.create != null) {
           for (const cmd of result.create) {
               if (cmd.commandType === 'texture' || cmd.commandType === 'color') {
-                  textured = true
+                  textured = true;
               }
           }
           for (const cmd of result.create) {
               if (cmd.commandType === 'solid') {
-                  rwx.userData.notSolid = !cmd.value
+                  rwx.userData.notSolid = !cmd.value;
               }
               if (cmd.commandType === 'visible') {
-                  rwx.visible = cmd.value
+                  rwx.visible = cmd.value;
               } else if (cmd.commandType === 'color') {
-                  this.applyTexture(rwx, null, null, cmd.color)
+                  this.applyTexture(rwx, null, null, cmd.color);
               } else if (cmd.commandType === 'texture') {
                   if (cmd.texture) {
-                      cmd.texture = cmd.texture.lastIndexOf('.') !== -1 ? cmd.texture.substring(0, cmd.texture.lastIndexOf('.')) : cmd.texture
+                      cmd.texture = cmd.texture.lastIndexOf('.') !== -1 ? cmd.texture.substring(0, cmd.texture.lastIndexOf('.')) : cmd.texture;
                       if (cmd.mask) {
-                          cmd.mask = cmd.mask.lastIndexOf('.') !== -1 ? cmd.mask.substring(0, cmd.mask.lastIndexOf('.')) : cmd.mask
+                          cmd.mask = cmd.mask.lastIndexOf('.') !== -1 ? cmd.mask.substring(0, cmd.mask.lastIndexOf('.')) : cmd.mask;
                       }
                   }
-                  texturing = this.applyTexture(rwx, cmd.texture, cmd.mask)
+                  texturing = this.applyTexture(rwx, cmd.texture, cmd.mask);
               }
               if (!textured) {
                   if (cmd.commandType === 'sign') {
-                      this.makeSign(rwx, cmd.text, cmd.color, cmd.bcolor)
+                      this.makeSign(rwx, cmd.text, cmd.color, cmd.bcolor);
                       //this.makeSign(rwx, "hey!", {r: 255, g: 255, b: 255}, {r: 0, g: 0, b: 0})
 
                   }
                   if (cmd.commandType === 'picture') {
-                      this.makePicture(rwx, cmd.resource)
+                      this.makePicture(rwx, cmd.resource);
                   }
                   if (cmd.commandType === 'media') {
                       this.makeMedia(rwx, cmd.resource);
-                      console.log("?")
                   }
 
               }
@@ -116,39 +115,38 @@ export default class MainObject extends Group {
       }
       if (result.activate != null) {
           for (const cmd of result.activate) {
-              rwx.userData.clickable = true
+              rwx.userData.clickable = true;
               if (cmd.commandType === 'teleport') {
-                  rwx.userData.teleportClick = cmd.coordinates[0]
+                  rwx.userData.teleportClick = cmd.coordinates[0];
               }
           }
       }
       if (!textured) {
-          return
+          return;
       }
       if (texturing != null) {
           // there are textures, we wait for them to load
           texturing.subscribe(() => {
               for (const cmd of result.create) {
                   if (cmd.commandType === 'sign') {
-                      this.makeSign(rwx, cmd.text, cmd.color, cmd.bcolor)
+                      this.makeSign(rwx, cmd.text, cmd.color, cmd.bcolor);
                   }
                   if (cmd.commandType === 'picture') {
-                      this.makePicture(rwx, cmd.resource)
+                      this.makePicture(rwx, cmd.resource);
                   }
                   if (cmd.commandType === 'media') {
                       this.makeMedia(rwx, cmd.resource);
-                      console.log("?")
                   }
               }
-          })
+          });
       } else {
           // color, no need to wait
           for (const cmd of result.create) {
               if (cmd.commandType === 'sign') {
-                  this.makeSign(rwx, cmd.text, cmd.color, cmd.bcolor)
+                  this.makeSign(rwx, cmd.text, cmd.color, cmd.bcolor);
               }
               if (cmd.commandType === 'picture') {
-                  this.makePicture(rwx, cmd.resource)
+                  this.makePicture(rwx, cmd.resource);
               }
           }
       }
@@ -163,8 +161,8 @@ export default class MainObject extends Group {
               if (child instanceof Mesh) {
                   const newMaterials = [];
                   newMaterials.push(...child.material);
-                  if (item.userData.taggedMaterials[200]) {
-                      for (const i of item.userData.taggedMaterials[200]) {
+                  if (item.userData.taggedMaterials[pictureTag]) {
+                      for (const i of item.userData.taggedMaterials[pictureTag]) {
                           newMaterials[i] = child.material[i].clone();
                           newMaterials[i].map = image;
                           newMaterials[i].needsUpdate = true;
@@ -194,23 +192,23 @@ export default class MainObject extends Group {
 
       document.body.appendChild(this.createElementFromHTML(videoHTML));
       const video = document.getElementById('video#' + uid); // as HTMLVideoElement;
-       video.muted = false
+      video.muted = false;
       //video.play();
       let videoTexture = new VideoTexture(video);
       item.traverse((child) => {
           if (child instanceof Mesh) {
               const newMaterials = [];
               newMaterials.push(...child.material);
-              if (item.userData.taggedMaterials[100]) {
-                  for (const i of item.userData.taggedMaterials[100]) {
+              if (item.userData.taggedMaterials[signTag]) {
+                  for (const i of item.userData.taggedMaterials[signTag]) {
                       newMaterials[i] = child.material[i].clone();
                       newMaterials[i].color = new Color(1, 1, 1);
                       newMaterials[i].map = videoTexture;
                       newMaterials[i].map.encoding = sRGBEncoding;
                   }
               } else {
-                  if (item.userData.taggedMaterials[200]) {
-                      for (const i of item.userData.taggedMaterials[200]) {
+                  if (item.userData.taggedMaterials[pictureTag]) {
+                      for (const i of item.userData.taggedMaterials[pictureTag]) {
                           newMaterials[i] = child.material[i].clone();
                           newMaterials[i].color = new Color(1, 1, 1);
                           newMaterials[i].map = videoTexture;
@@ -229,87 +227,87 @@ export default class MainObject extends Group {
   }
 
   textCanvas(text, ratio = 1, color, bcolor) {
-      const canvas = document.createElement('canvas')
+      const canvas = document.createElement('canvas');
       if (ratio > 1.0) {
-          canvas.width = 256
-          canvas.height = 256 / ratio
+          canvas.width = 256;
+          canvas.height = 256 / ratio;
       } else {
-          canvas.width = 256 * ratio
-          canvas.height = 256
+          canvas.width = 256 * ratio;
+          canvas.height = 256;
       }
-      const ctx = canvas.getContext('2d')
-      ctx.fillStyle = `rgb(${bcolor.r},${bcolor.g},${bcolor.b})`
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = `rgb(${bcolor.r},${bcolor.g},${bcolor.b})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
 
-      const fontSizes = [120, 50, 40, 30, 20, 10, 5]
-      let fontIndex = 0
+      const fontSizes = [120, 50, 40, 30, 20, 10, 5];
+      let fontIndex = 0;
 
-      const words = text.split(/([ \n])/)
-      let lines = ['']
-      const maxWidth = canvas.width * 0.95
-      const maxHeight = canvas.height * 0.95
+      const words = text.split(/([ \n])/);
+      let lines = [''];
+      const maxWidth = canvas.width * 0.95;
+      const maxHeight = canvas.height * 0.95;
 
-      ctx.font = `${fontSizes[fontIndex]}px Arial`
+      ctx.font = `${fontSizes[fontIndex]}px Arial`;
 
       // TODO: use a proper way to get line height from font size
-      const fontSizeToHeightRatio = 1
-      let lineHeight = fontSizes[fontIndex] * fontSizeToHeightRatio
+      const fontSizeToHeightRatio = 1;
+      let lineHeight = fontSizes[fontIndex] * fontSizeToHeightRatio;
 
-      let curWordIndex = 0
+      let curWordIndex = 0;
 
       let tentativeWord;
       let tentativeLine;
 
       while (curWordIndex < words.length) {
-          const curLine = lines.length - 1
+          const curLine = lines.length - 1;
 
           if (words[curWordIndex] === '\n') {
-              tentativeWord = ''
+              tentativeWord = '';
           } else {
-              tentativeWord = words[curWordIndex]
+              tentativeWord = words[curWordIndex];
           }
 
           if (lines[curLine].length > 0) {
-              tentativeLine = lines[curLine] + tentativeWord
+              tentativeLine = lines[curLine] + tentativeWord;
           } else {
-              tentativeLine = tentativeWord
+              tentativeLine = tentativeWord;
           }
 
           if (words[curWordIndex] !== '\n' && ctx.measureText(tentativeLine).width <= maxWidth) {
               // TODO: use actualBoundingBoxLeft and actualBoundingBoxRight instead of .width
               // Adding word to end of line
-              lines[curLine] = tentativeLine
-              curWordIndex += 1
+              lines[curLine] = tentativeLine;
+              curWordIndex += 1;
           } else if (ctx.measureText(tentativeWord).width <= maxWidth && lineHeight * (curLine + 1) <= maxHeight) {
               // Adding word as a new line
-              lines.push(tentativeWord)
-              curWordIndex += 1
+              lines.push(tentativeWord);
+              curWordIndex += 1;
           } else if (fontIndex < fontSizes.length - 1) {
               // Retry all with smaller font size
-              fontIndex += 1
-              ctx.font = `${fontSizes[fontIndex]}px Arial`
-              lineHeight = fontSizes[fontIndex] * fontSizeToHeightRatio
-              lines = ['']
-              curWordIndex = 0
+              fontIndex += 1;
+              ctx.font = `${fontSizes[fontIndex]}px Arial`;
+              lineHeight = fontSizes[fontIndex] * fontSizeToHeightRatio;
+              lines = [''];
+              curWordIndex = 0;
           } else {
               // Min font size reached, add word as new line anyway
-              lines.push(tentativeWord)
-              curWordIndex += 1
+              lines.push(tentativeWord);
+              curWordIndex += 1;
           }
       }
 
       lines.forEach((line, i) => {
-          ctx.fillText(line, canvas.width / 2, canvas.height / 2 + i * lineHeight - (lines.length - 1) * lineHeight / 2)
-      })
+          ctx.fillText(line, canvas.width / 2, canvas.height / 2 + i * lineHeight - (lines.length - 1) * lineHeight / 2);
+      });
 
-      return canvas
+      return canvas;
   }
   makeSign(item, text, color, bcolor) {
       if (text == null) {
-          text = item.userData.desc != null ? item.userData.desc : ''
+          text = item.userData.desc != null ? item.userData.desc : '';
           //text = this.description;
       }
       if (color == null) {
@@ -329,20 +327,20 @@ export default class MainObject extends Group {
 
       item.traverse((child) => {
           if (child instanceof Mesh) {
-              const newMaterials = []
-              newMaterials.push(...child.material)
+              const newMaterials = [];
+              newMaterials.push(...child.material);
               if (item.userData.taggedMaterials[signTag]) {
                   for (const i of item.userData.taggedMaterials[signTag]) {
-                      newMaterials[i] = child.material[i].clone()
-                      newMaterials[i].color = new Color(1, 1, 1)
-                      newMaterials[i].map = new CanvasTexture(this.textCanvas(text, newMaterials[i].userData.ratio, color, bcolor))
-                      newMaterials[i].map.encoding = sRGBEncoding
+                      newMaterials[i] = child.material[i].clone();
+                      newMaterials[i].color = new Color(1, 1, 1);
+                      newMaterials[i].map = new CanvasTexture(this.textCanvas(text, newMaterials[i].userData.ratio, color, bcolor));
+                      newMaterials[i].map.encoding = sRGBEncoding;
                   }
               }
-              child.material = newMaterials
-              child.material.needsUpdate = true
+              child.material = newMaterials;
+              child.material.needsUpdate = true;
           }
-      })
+      });
   }
 
   update(delta) {
@@ -384,9 +382,9 @@ export default class MainObject extends Group {
                       if (color != null) {
                           newRWXMat.color = [color.r / 255.0, color.g / 255.0, color.b / 255.0];
                       }
-                      const signature = newRWXMat.getMatSignature()
-                      rwxMaterialManager.addRWXMaterial(newRWXMat, signature)
-                      const curMat = rwxMaterialManager.getThreeMaterialPack(signature)
+                      const signature = newRWXMat.getMatSignature();
+                      rwxMaterialManager.addRWXMaterial(newRWXMat, signature);
+                      const curMat = rwxMaterialManager.getThreeMaterialPack(signature);
 
                       newMaterials.push(curMat.threeMat);
                       promises.push(forkJoin(curMat.loadingPromises));

@@ -1,6 +1,6 @@
 {
   "name": "rwx-viewer",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "For those pesky RWX Models. The ones that everyone forgot about.",
   "main": "entry.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@babel/core": "^7.14.3",
     "babel-loader": "^8.2.2",
-    "eslint": "^8.7.0",
+    "eslint": "^8.28.0",
     "eslint-plugin-import": "^2.25.4",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.3.1",
