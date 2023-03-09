@@ -1,11 +1,17 @@
 // Based on code from https:// github.com/7185/lemuria/blob/dev/src/app/world/object.service.ts
 import { forkJoin } from 'rxjs';
-import { Group, Mesh, CanvasTexture, TextureLoader, sRGBEncoding, Color,
+import { Group, Mesh, CanvasTexture,
+  LoadingManager,
+  TextureLoader, sRGBEncoding, Color,
   VideoTexture, MathUtils } from 'three';
-import RWXLoader, { RWXMaterialManager, pictureTag, signTag } from 'three-rwx-loader';
+  import RWXLoader, {
+    RWXMaterialManager,
+    pictureTag,
+    signTag
+  } from 'three-rwx-loader';
+import * as fflate from 'fflate';
 import { AWActionParser } from 'aw-action-parser';
-import * as JSZip from 'jszip';
-import JSZipUtils from 'jszip-utils';
+
 import Utils from '../Utils';
 
 export default class MainObject extends Group {
@@ -27,15 +33,18 @@ export default class MainObject extends Group {
     this.objectScale[0] = this.clampScale(this.objectScale[0]);
     this.objectScale[1] = this.clampScale(this.objectScale[1]);
     this.objectScale[2] = this.clampScale(this.objectScale[2]);
-    this.rwxLoader = new RWXLoader();
-    this.curRWX = null;
-
     this.path = scene.json.path.base;
     this.path_models = this.path + scene.json.path.models;
     this.path_textures = this.path + scene.json.path.textures;
+    this.loadingManager = new LoadingManager();
+    this.materialManager = new RWXMaterialManager(this.path + "textures",
+      '.png', '.zip', fflate, false, this.textureEncoding);
+    this.loader = (new RWXLoader(this.loadingManager))
+    .setRWXMaterialManager(this.materialManager)
+    .setPath(this.path + "rwx").setFlatten(true);
+    this.curRWX = null;
 
-    this.rwxLoader.setPath(this.path_models).setResourcePath(this.path_textures).setJSZip(JSZip, JSZipUtils).setWaitFullLoad(true).setFlatten(true).setTextureEncoding(sRGBEncoding); // .setUseBasicMaterial(true)
-    this.rwxLoader.load(this.model, (rwx) => {
+    this.loader.load(this.model, (rwx) => {
       // Object Data
       // BUG: Pivot point doesn't automatically changed - which gave me an idea: "Orbit" command (N(Y)I)
       rwx.position.set(this.objectPosition[0], this.objectPosition[1], this.objectPosition[2]);
@@ -369,7 +378,9 @@ export default class MainObject extends Group {
     }
   }
   applyTexture(item, textureName, maskName, color) {
-      const rwxMaterialManager = new RWXMaterialManager(this.path_textures, '.jpg', 'zip', JSZip, JSZipUtils, true, sRGBEncoding);
+      //const rwxMaterialManager = new RWXMaterialManager(this.path_textures, '.png', 'zip', JSZip, JSZipUtils, true, sRGBEncoding);
+    const rwxMaterialManager = new RWXMaterialManager(this.path + "textures",
+      '.jpg', '.zip', fflate, false, this.textureEncoding);
       const promises = [];
       item.traverse((child) => {
           if (child instanceof Mesh) {

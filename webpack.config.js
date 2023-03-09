@@ -9,12 +9,15 @@ module.exports = {
   entry: ['./src/entry.js'],
   output: {
     path: path.join(__dirname, buildPath),
-    filename: '[name].[hash].js'
+    filename: '[name].[fullhash].js'
   },
   resolve: {
     symlinks: true
   },
   mode: 'development',
+  devServer: {
+    allowedHosts: ["all"],
+  },
   target: 'web',
   devtool: 'source-map',
   module: {

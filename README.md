@@ -40,8 +40,5 @@ This project makes use of:
 
 * [aw-action-parser (MIT)](https://github.com/Heldroe/aw-action-parser/blob/main/LICENSE)
 * [three-rwx-loader (MIT)](https://github.com/Blaxar/three-rwx-loader)
-* [three-seed (MIT)](https://github.com/edwinwebb/three-seed/blob/master/LICENSE)
 * And code from [Lemuria (MIT)!](https://github.com/7185/lemuria)
 * [rxjs (Apache 2.0)](https://github.com/ReactiveX/rxjs/blob/master/LICENSE.txt)
-* [JSZip (MIT)](https://github.com/Stuk/jszip/blob/master/LICENSE.markdown)
-* [JSZip-utils (MIT)](https://github.com/Stuk/jszip-utils)

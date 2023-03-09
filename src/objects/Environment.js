@@ -1,14 +1,14 @@
 import {
     Group,
-    SpotLight,
-    PointLight,
+    //SpotLight,
+    //PointLight,
     AmbientLight,
-    HemisphereLight,
-    TextureLoader,
-    PlaneGeometry,
-    Mesh,
-    MeshLambertMaterial,
-    MeshBasicMaterial
+    //HemisphereLight,
+    //TextureLoader,
+    //PlaneGeometry,
+    //Mesh,
+    //MeshLambertMaterial,
+    //MeshBasicMaterial
 
     //sRGBEncoding
 } from 'three';
