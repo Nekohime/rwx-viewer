@@ -34,6 +34,9 @@ module.exports = {
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({'title': title})
+    new HtmlWebpackPlugin({
+      'title': title,
+      'template': 'src/index.html'
+    })
   ]
 };

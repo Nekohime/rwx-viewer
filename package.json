@@ -1,12 +1,12 @@
 {
   "name": "rwx-viewer",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "For those pesky RWX Models. The ones that everyone forgot about.",
   "main": "entry.js",
   "scripts": {
     "start": "npx webpack serve --mode development --host 0.0.0.0 --port 5000",
     "build": "webpack --mode development",
-    "lint": "./node_modules/.bin/eslint ./src/*.js && ./node_modules/.bin/eslint ./src/objects/*.js && ./node_modules/.bin/eslint ./*.js"
+    "lint": "./node_modules/.bin/eslint './src/**/*.js' --fix"
   },
   "keywords": [
     "rwx",

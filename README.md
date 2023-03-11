@@ -1,32 +1,29 @@
 # RWX Viewer
 
-For those pesky RWX Models. The ones that everyone forgot about.
+Model Viewer for RenderWare Script (RWX) files with extensions from a Metaverse program from the 90s!
 
 ## How to Use
 
-* Click around and scroll :)
 * Rename or copy `./src/{scene, object}.example.json` to `./src/{scene, object}.json` to change the Scene and Object and their properties
-* `ln -s /path/to/object/path/ path`
+* Change `path.base` in `scene.json` to the base folder where your assets reside
+* Change `path.models` and `path.textures` to the folders where these types of assets reside in the base folder
+  * Models must be unzipped.
 * Install dependencies with `npm install`
 * `npm run start` and have fun!
-  * You don't need to restart when changing configs or code, it does it automatically (and fast!)
+  * You don't need to restart when changing configs or code. Saving automatically refreshes the page.
+* Click around, move the camera scroll :)
+  * Enjoy!
 
 ## Features
 
-Implemented:
-
-* Create
-* Color, Texture, Picture, Sign, Move (moves forever), Rotate, Scale, Visible, Media (click to play/pause)
+* Create: Color, Texture, Picture, Sign, Move (moves forever), Rotate, Scale, Visible, Media (click to play/pause)
 * Ground
 * Environment (Partially)
   * Lighting
 
 Planned:
 
-* Activate, Opacity\*
-  * No Opacity in AWAP yet :-(
-* Animated Textures
-* Skybox
+* Interactivity, Opacity, Animated Textures, Skyboxes
 
 Maybe:
 

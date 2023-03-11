@@ -16,7 +16,8 @@
         "sourceType": "module"
     },
     "rules": {
-      "semi": [2, "always"]
+      "semi": [2, "always"],
+      "quotes": [2, "single", { "avoidEscape": true, "allowTemplateLiterals": true }]
     },
     "ignorePatterns": ["*RWXLoader.js*"],
     "globals": {

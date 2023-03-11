@@ -1,4 +1,7 @@
 export default class Utils {
+  // Utils.modelName normalizes a model's filename into a .rwx
+  //  If a given filename has no extension, or is a .zip, (or a .rwx)
+  //   It will give us the model's name with the .rwx extension
   static modelName(name) {
     const hasExtensionRegex = /^.*\.[^\\]+$/i;
 

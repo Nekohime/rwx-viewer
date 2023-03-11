@@ -3,9 +3,12 @@ import {Clock, WebGLRenderer, PerspectiveCamera, Scene, Vector3,
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import MainScene from './objects/Scene';
 
+const canvas = document.querySelector('canvas');
+
 const scene = new Scene();
 const camera = new PerspectiveCamera();
 const renderer = new WebGLRenderer({
+  canvas: canvas,
   antialias: true,
   alpha: false, // Transparent background
   stencil: false,
@@ -14,7 +17,7 @@ renderer.outputEncoding = sRGBEncoding;
 renderer.shadowMap.enabled = false;
 
 
-new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
 camera.position.set(6, 3, 10);
 camera.lookAt(new Vector3(0, 0, 0));
 const seedScene = new MainScene(camera);
@@ -34,6 +37,8 @@ function update() {
   delta += clock.getDelta();
 
   if (delta > interval) {
+    controls.update();
+
     renderer.render(scene, camera);
     seedScene.update && seedScene.update(delta);
     delta = delta & interval;
@@ -71,11 +76,10 @@ window.addEventListener('pointerdown', function() {
   for (let i = 0; i < intersects.length; i++) {
     if (intersects[i].object.name.length >= 1) {
       if (intersects[i].object.name.endsWith('.rwx')) {
-      console.log(intersects[i].object);
-    } else {
-      console.log(intersects[i].object.parent.parent);
-    }
-
+        console.log(intersects[i].object);
+      } else {
+        console.log(intersects[i].object.parent.parent);
+      }
 
       return;
     }
@@ -100,4 +104,4 @@ favicon.href = 'data:,';
 head.appendChild(favicon);
 
 document.body.style.margin = '0';
-document.body.appendChild( renderer.domElement );
+// document.body.appendChild( renderer.domElement );

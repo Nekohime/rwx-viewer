@@ -1,8 +1,0 @@
-{
-  "model": "sign5.rwx",
-  "description": "Hej!",
-  "action": "create sign bcolor=black color=orange, rotate 5",
-  "position": [0,0,0],
-  "rotation": [0,0,0],
-  "scale": [1,1,1]
-}
