@@ -19,6 +19,7 @@ camera.position.set(6, 3, 10);
 camera.lookAt(new Vector3(0, 0, 0));
 const seedScene = new MainScene(camera);
 seedScene.init();
+
 scene.add(seedScene);
 
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -40,20 +41,54 @@ function update() {
 }
 update();
 
-/*
-const onAnimationFrameHandler = (timeStamp) => {
-  renderer.render(scene, camera);
-  seedScene.update && seedScene.update(timeStamp);
-  window.requestAnimationFrame(onAnimationFrameHandler);
-};
-window.requestAnimationFrame(onAnimationFrameHandler);
-*/
+window.addEventListener('pointermove', function(event) {
+  seedScene.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  seedScene.pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+});
+
+// TODO: Improve this.
+
+window.addEventListener('pointerdown', function() {
+  const intersects = seedScene.raycaster.intersectObjects(seedScene.children);
+
+  if (intersects[0] && intersects[0].object.userData.mediaPlayer) {
+    const mediaPlayer = intersects[0].object.userData.mediaPlayer;
+    // let videoTexture = mediaPlayer.videoTexture; // Never used
+    const video = mediaPlayer.videoElement;
+    const source = video.querySelector('source');
+
+    if (!video.paused) {
+      video.pause();
+    } else {
+      video.play();
+    }
+
+    console.log(source);
+    console.log(intersects[0].object.userData);
+  }
+
+  // Get the first object we come across and console.log it.
+  for (let i = 0; i < intersects.length; i++) {
+    if (intersects[i].object.name.length >= 1) {
+      if (intersects[i].object.name.endsWith('.rwx')) {
+      console.log(intersects[i].object);
+    } else {
+      console.log(intersects[i].object.parent.parent);
+    }
+
+
+      return;
+    }
+  }
+});
+
 const windowResizeHandler = () => {
   const {innerHeight, innerWidth} = window;
   renderer.setSize(innerWidth, innerHeight);
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
 };
+
 windowResizeHandler();
 window.addEventListener('resize', windowResizeHandler);
 

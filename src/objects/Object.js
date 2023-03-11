@@ -1,73 +1,100 @@
 // Based on code from https:// github.com/7185/lemuria/blob/dev/src/app/world/object.service.ts
 import { forkJoin } from 'rxjs';
-import { Group, Mesh, CanvasTexture,
+import * as fflate from 'fflate';
+import {
+  Group, Mesh, CanvasTexture,
   LoadingManager,
   TextureLoader, sRGBEncoding, Color,
-  VideoTexture, MathUtils } from 'three';
-  import RWXLoader, {
+  VideoTexture, MathUtils
+} from 'three';
+import RWXLoader, {
     RWXMaterialManager,
     pictureTag,
     signTag
-  } from 'three-rwx-loader';
-import * as fflate from 'fflate';
+} from 'three-rwx-loader';
 import { AWActionParser } from 'aw-action-parser';
 
+// WIP
+// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+// import { VRMLLoader } from 'three/addons/loaders/VRMLLoader.js';
+
 import Utils from '../Utils';
+
 
 export default class MainObject extends Group {
   constructor(scene) {
     super();
     this.json = require("../object.json");
     this.scene = scene;
-    this.model = Utils.modelName(this.json.model);
+    this.modelName = Utils.modelName(this.json.model);
+
+    this.parser = new AWActionParser();
+
+    // Object Data
     this.description = this.json.description;
     this.action = this.json.action;
-    this.parser = new AWActionParser();
     this.actionResult = this.parser.parse(this.action);
-    this.objectAppliedRotation = { speed: { x: 0, y: 0, z: 0 } };
-    this.objectAppliedMove = { distance: { x: 0, y: 0, z: 0 } };
-    this.objectAppliedScale = { factor: { x: 1, y: 1, z: 1 } };
+
+    // Object Data Transforms
     this.objectPosition = this.json.position;
     this.objectRotation = this.json.rotation;
     this.objectScale = this.json.scale;
-    this.objectScale[0] = this.clampScale(this.objectScale[0]);
-    this.objectScale[1] = this.clampScale(this.objectScale[1]);
-    this.objectScale[2] = this.clampScale(this.objectScale[2]);
+
+    // Scripted Transforms
+    this.objectAppliedRotation = { speed: { x: 0, y: 0, z: 0 } };
+    this.objectAppliedMove = { distance: { x: 0, y: 0, z: 0 } };
+    this.objectAppliedScale = { factor: { x: 1, y: 1, z: 1 } };
+
+    this.objectScale[0] = Utils.clampScale(this.objectScale[0]);
+    this.objectScale[1] = Utils.clampScale(this.objectScale[1]);
+    this.objectScale[2] = Utils.clampScale(this.objectScale[2]);
+
+    // Path Stuff
     this.path = scene.json.path.base;
     this.path_models = this.path + scene.json.path.models;
     this.path_textures = this.path + scene.json.path.textures;
-    this.loadingManager = new LoadingManager();
-    this.materialManager = new RWXMaterialManager(this.path + "textures",
-      '.png', '.zip', fflate, false, this.textureEncoding);
-    this.loader = (new RWXLoader(this.loadingManager))
-    .setRWXMaterialManager(this.materialManager)
-    .setPath(this.path + "rwx").setFlatten(true);
-    this.curRWX = null;
 
-    this.loader.load(this.model, (rwx) => {
+    this.textureEncoding = sRGBEncoding;
+    this.loadingManager = new LoadingManager();
+    this.materialManager = null;
+    this.loader = null;
+
+  }
+
+  init() {
+
+    // Utils.modelName normalizes a model's filename into a .rwx
+    //  If a given filename has no extension, or is a .zip, (or a .rwx)
+    //   It will give us the model's name with the .rwx extension
+    //    We can add more conditions to setup new model loaders.
+    if (this.modelName.endsWith('.rwx')) {
+      this.setRWXLoader();
+    }
+
+    this.loader.load(this.modelName, (model) => {
+      model.name = this.modelName;
       // Object Data
-      // BUG: Pivot point doesn't automatically changed - which gave me an idea: "Orbit" command (N(Y)I)
-      rwx.position.set(this.objectPosition[0], this.objectPosition[1], this.objectPosition[2]);
-      rwx.rotation.set(MathUtils.degToRad(this.objectRotation[0]), MathUtils.degToRad(this.objectRotation[1]), MathUtils.degToRad(this.objectRotation[2]));
-      rwx.scale.set(this.objectScale[0], this.objectScale[1], this.objectScale[1]); // This is not currently implemented in any universe tech, but is here because I think it would be pretty cool.
-      this.axisAlignment = rwx.userData.rwx.axisAlignment || 'none'; // Billboard support
-      rwx.userData.desc = this.description;
-      this.execActions(rwx);
-      this.add(rwx);
+      // BUG: Pivot point doesn't automatically changed (EDIT, March 2023: What?)- which gave me an idea: "Orbit" command (N(Y)I)
+      model.position.set(this.objectPosition[0], this.objectPosition[1], this.objectPosition[2]);
+      model.rotation.set(MathUtils.degToRad(this.objectRotation[0]), MathUtils.degToRad(this.objectRotation[1]), MathUtils.degToRad(this.objectRotation[2]));
+      // TODO: Scaling is fucked. Fix? related to strict mode not being a thing anymore?
+      model.scale.set(this.objectScale[0], this.objectScale[1], this.objectScale[2 /* was 1? */]); // This is not currently implemented in any universe tech, but is here because I think it would be pretty cool.
+      this.axisAlignment = model.userData.rwx.axisAlignment || 'none'; // Billboard support
+      model.userData.desc = this.description;
+      this.execActions(model);
+      this.add(model);
     });
   }
 
-  clampScale(value) { // For Object Data Scaling (A feature not currently in Lemuria)
-    let SCALE_MIN = this.scene.strict_mode ? 0.2 : 0.1; // Lemuria compat. The scripting way *will* clamp SCALE_MIN to 0.2!
-    let SCALE_MAX = 10;
-    if (value > 0) {
-      return Math.max(Math.min(value, SCALE_MAX), SCALE_MIN);
-    } else {
-      return 1;
-    }
+  setRWXLoader(model) {
+    this.materialManager = new RWXMaterialManager(this.path + "textures",
+      '.jpg', '.zip', fflate, false, this.textureEncoding);
+    this.loader = (new RWXLoader(this.loadingManager))
+      .setRWXMaterialManager(this.materialManager)
+      .setPath(this.path + "rwx").setFlatten(true);
   }
 
-  execActions(rwx) {
+  execActions(model) {
 
       let textured = false;
       let texturing = null;
@@ -81,32 +108,30 @@ export default class MainObject extends Group {
           }
           for (const cmd of result.create) {
               if (cmd.commandType === 'solid') {
-                  rwx.userData.notSolid = !cmd.value;
+                  model.userData.notSolid = !cmd.value;
               }
               if (cmd.commandType === 'visible') {
-                  rwx.visible = cmd.value;
+                  model.visible = cmd.value;
               } else if (cmd.commandType === 'color') {
                   this.applyTexture(rwx, null, null, cmd.color);
               } else if (cmd.commandType === 'texture') {
                   if (cmd.texture) {
-                      cmd.texture = cmd.texture.lastIndexOf('.') !== -1 ? cmd.texture.substring(0, cmd.texture.lastIndexOf('.')) : cmd.texture;
+                      //cmd.texture = cmd.texture.lastIndexOf('.') !== -1 ? cmd.texture.substring(0, cmd.texture.lastIndexOf('.')) : cmd.texture;
                       if (cmd.mask) {
                           cmd.mask = cmd.mask.lastIndexOf('.') !== -1 ? cmd.mask.substring(0, cmd.mask.lastIndexOf('.')) : cmd.mask;
                       }
                   }
-                  texturing = this.applyTexture(rwx, cmd.texture, cmd.mask);
+                  texturing = this.applyTexture(model, cmd.texture, cmd.mask);
               }
               if (!textured) {
                   if (cmd.commandType === 'sign') {
-                      this.makeSign(rwx, cmd.text, cmd.color, cmd.bcolor);
-                      //this.makeSign(rwx, "hey!", {r: 255, g: 255, b: 255}, {r: 0, g: 0, b: 0})
-
+                      this.makeSign(model, cmd.text, cmd.color, cmd.bcolor);
                   }
                   if (cmd.commandType === 'picture') {
-                      this.makePicture(rwx, cmd.resource);
+                      this.makePicture(model, cmd.resource);
                   }
                   if (cmd.commandType === 'media') {
-                      this.makeMedia(rwx, cmd.resource);
+                      this.makeMedia(model, cmd.resource);
                   }
 
               }
@@ -124,9 +149,10 @@ export default class MainObject extends Group {
       }
       if (result.activate != null) {
           for (const cmd of result.activate) {
-              rwx.userData.clickable = true;
+              model.userData.clickable = true;
               if (cmd.commandType === 'teleport') {
-                  rwx.userData.teleportClick = cmd.coordinates[0];
+                  // ?????
+                  model.userData.teleportClick = cmd.coordinates[0];
               }
           }
       }
@@ -369,7 +395,6 @@ export default class MainObject extends Group {
     }
     if (this.objectAppliedScale.factor) {
       this.scale.set(this.objectAppliedScale.factor.x, this.objectAppliedScale.factor.y, this.objectAppliedScale.factor.z); // Scripted Scaling
-      // console.log(this.objectAppliedScale.factor.x, this.objectAppliedScale.factor.y, this.objectAppliedScale.factor.z)
     }
     if (this.axisAlignment !== 'none') {
       this.rotation.y = Math.atan2(
@@ -378,9 +403,8 @@ export default class MainObject extends Group {
     }
   }
   applyTexture(item, textureName, maskName, color) {
-      //const rwxMaterialManager = new RWXMaterialManager(this.path_textures, '.png', 'zip', JSZip, JSZipUtils, true, sRGBEncoding);
-    const rwxMaterialManager = new RWXMaterialManager(this.path + "textures",
-      '.jpg', '.zip', fflate, false, this.textureEncoding);
+      const rwxMaterialManager = new RWXMaterialManager(this.path + "textures",
+        '.jpg', '.zip', fflate, false, this.textureEncoding);
       const promises = [];
       item.traverse((child) => {
           if (child instanceof Mesh) {

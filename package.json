@@ -1,6 +1,6 @@
 {
   "name": "rwx-viewer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "For those pesky RWX Models. The ones that everyone forgot about.",
   "main": "entry.js",
   "scripts": {

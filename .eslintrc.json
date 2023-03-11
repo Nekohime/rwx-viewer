@@ -18,6 +18,7 @@
     "rules": {
       "semi": [2, "always"]
     },
+    "ignorePatterns": ["*RWXLoader.js*"],
     "globals": {
       "require": true
     }
