@@ -1,22 +1,9 @@
-import * as fflate from 'fflate';
-import RWXLoader, {
-  RWXMaterialManager,
-} from 'three-rwx-loader';
 import {
   Group, LoadingManager, Vector2, Raycaster,
 } from 'three';
 
-
-// WIP - Pain in the ass shit format, with an inflexible loader.
-//  Blender isn't helping either.
-// May remove GLTF support in the future.
-// a Three-RWX-Exporter would be amazing, and make GLTF support useful
-// (Or GLTF support in WideWorlds)
-// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-// import { VRMLLoader } from 'three/addons/loaders/VRMLLoader.js';
-
 import Environment from './Environment';
-import MainObject from './Object';
+import Object from './Object';
 import Utils from '../Utils';
 
 // const hasExtensionRegex = /^.*\.[^\\]+$/i;
@@ -27,13 +14,24 @@ export default class MainScene extends Group {
     // Scene JSON Setup
     this.json = require('../scene.json');
     this.path = this.json.path.base + '/';
-    this.path_models = this.json.path.models + '/';
     this.modelName = Utils.modelName(this.json.ground);
 
     // World Setup
     this.camera = camera;
     this.environment = new Environment();
-    this.object = new MainObject(this);
+    this.groundObject = new Object(this, this.json.ground, null, null);
+
+    this.mainObjectName = Utils.modelName(this.json.object.model);
+    this.mainObjectAction = this.json.object.action;
+    this.mainObjectDescription = this.json.object.description;
+    if ($_GET['model']) this.mainObjectName = Utils.modelName($_GET['model']);
+    if ($_GET['desc']) this.mainObjectDescription = $_GET['desc'];
+    if ($_GET['action']) this.mainObjectAction = $_GET['action'];
+
+    this.mainObject = new Object(this,
+        this.mainObjectName,
+        this.mainObjectDescription,
+        this.mainObjectAction);
 
     // Loader Setup
     this.loadingManager = new LoadingManager();
@@ -47,54 +45,19 @@ export default class MainScene extends Group {
 
   init() {
     this.environment.init();
-    this.object.init();
+    this.groundObject.init();
+    this.mainObject.init();
     this.add(this.environment);
-    this.add(this.object);
-
-    // We retrieve the normalized model's name, and use the appropriate loader
-    //  based on the file extension We can add more conditions to setup new
-    //   model loaders.
-    if (this.modelName.endsWith('.rwx')) {
-      this.setRWXLoader();
-    } else if (this.modelName.endsWith('.gltf')) {
-      // this.setGLTFLoader();
-    }
+    this.add(this.groundObject);
+    this.add(this.mainObject);
   }
-
-  // RWXLoader
-  setRWXLoader() {
-    this.materialManager = new RWXMaterialManager(this.path + 'textures',
-        '.jpg', '.zip', fflate, false, this.textureEncoding);
-    this.loader = (new RWXLoader(this.loadingManager))
-        .setRWXMaterialManager(this.materialManager)
-        .setPath(this.path + 'rwx').setFlatten(true);
-    this.loader.load(this.modelName, (model) => {
-      model.name = this.modelName;
-
-      this.add(model);
-    }, null);
-  }
-
-  // GLTFLoader
-  /*
-  setGLTFLoader() {
-    this.loader = new GLTFLoader();
-    this.loader.load(this.path + this.path_models + this.modelName, (model) => {
-      model.scene.name = this.modelName;
-      console.log(model)
-      //console.log(model.scene.name)
-
-
-      this.add(model.scene);
-    }, null);
-  }
-  */
 
   update(delta) {
     this.raycaster.setFromCamera(this.pointer, this.camera);
 
 
     this.environment.update(delta);
-    this.object.update(delta); // speed * timeStamp / 2500
+    this.groundObject.update(delta); // speed * timeStamp / 2500
+    this.mainObject.update(delta); // speed * timeStamp / 2500
   }
 }

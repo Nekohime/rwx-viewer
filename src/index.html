@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <script>
+      window.$_GET = location.search.substr(1).split("&").reduce((o,i)=>(u=decodeURIComponent,[k,v]=i.split("="),o[u(k)]=v&&u(v),o),{});
+    </script>
+    <style>
+      #container {
+        height: 100%;
+        width: 100%;
+        position: relative;
+      }
+      canvas {
+        margin: 0;
+        padding: 0;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+      }
+      #overlay {
+        position: absolute;
+        left: 200px;
+        top: 200px;
+        z-index: 1;
+        color: red;
+      }
+
+      .window-wrap {
+  border: 1px solid red;
+  border-radius: 4px;
+  width: 256px;
+  height: 384px;
+  left: 16px;
+  top: 16px;
+  background-color: #2f343f;
+  resize: both;
+  overflow: hidden;
+  min-width: 128px;
+  min-height: 64px;
+  max-width: 100%;
+  max-height: 100%;
+    position: absolute;
+}
+.window-wrap .maximized {
+  width: 100%;
+  height: 100%;
+}
+.window-header {
+  display:grid;
+  grid-template-columns: 32px 1fr auto;
+  color: white;
+  background-color: #292e37;
+  user-select: none; /* Standard */
+  height: 32px;
+  width: 100%;
+}
+.window-icons {
+  width:32px;
+  flex:1;
+  text-align:left;
+  user-drag: none;
+  user-select: none;
+}
+.window-icons img {
+
+}
+.window-title {
+  width: 100%;
+  text-align:center;
+
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.window-controls {
+  width: 100%;
+  text-align:right;
+  /*background-color: red;*/
+  display: flex;
+}
+.window-content {
+  height: 100%;
+  width: 100%;
+  overflow:hidden;
+  height: calc(100% - 32px);
+  /*border: 1px solid green;*/
+}
+
+      .model {
+        width: 128px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--<label for="model">Model: </label>
+    <input type="text" name="model" class="model">-->
+    <div id="container">
+      <canvas></canvas>
+    </div>
+
+    <script>
+let pJSON = {
+  title: 'Object Properties',
+  icon: ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEUAAAAqKkJnBJZtAAAAAnRSTlP/gAgPs2oAAAA3SURBVHgB7cohAQAACAMwGtC/JQ2gAfpi0yuC9D5GEARBEARBEARBEAQhLQiCIAiCIAiCIAikOEBcLz//9T+3AAAAAElFTkSuQmCC',
+  model: 'sign5.rwx',
+  description: 'This Editor will allow you to change the object. Soon(tm)',
+  action: 'create sign'
+};
+const windows = [];
+
+function createWindow(pJSON) {
+  let win = document.createElement('div');
+  win.classList.add('window-wrap');
+	//win.classList.add('maximized');
+	//win.id = programID;
+	win.pJSON = pJSON;
+	//win.iJSON = pJSON;
+    let winHeader = document.createElement('div');
+    winHeader.classList.add('window-header');
+      let winIcon = document.createElement('div');
+      winIcon.classList.add('window-icons');
+      winIcon.innerHTML = `<img src="${pJSON.icon}" width="32" height="32" draggable="false">`;
+
+      let winTitle = document.createElement('div');
+      winTitle.classList.add('window-title');
+      winTitle.textContent = pJSON.title;
+
+    winHeader.appendChild(winIcon);
+    winHeader.appendChild(winTitle);
+
+  win.appendChild(winHeader);
+
+  let winContent = document.createElement('div');
+  winContent.classList.add('window-content');
+	  let inputModel = document.createElement('input');
+      inputModel.type = 'text';
+      inputModel.value = pJSON.model;
+
+    let inputDescription = document.createElement('textarea');
+      inputDescription.value = pJSON.description;
+    let inputAction = document.createElement('textarea');
+      inputAction.value = pJSON.action;
+
+		winContent.appendChild(inputModel);
+    winContent.appendChild(inputDescription);
+    winContent.appendChild(inputAction);
+
+
+  win.appendChild(winContent);
+
+  windows.push(win);
+  return win;
+}
+// const container = document.querySelector("#container")
+// container.appendChild(createWindow(pJSON))
+</script>
+  </body>
+</html>

@@ -6,7 +6,7 @@ import {
   Group, Mesh, CanvasTexture,
   LoadingManager,
   TextureLoader, sRGBEncoding, Color,
-  VideoTexture, MathUtils,
+  VideoTexture, MathUtils, Vector3,
 } from 'three';
 import RWXLoader, {
   RWXMaterialManager,
@@ -22,24 +22,28 @@ import {AWActionParser} from 'aw-action-parser';
 import Utils from '../Utils';
 
 
-export default class MainObject extends Group {
-  constructor(scene) {
+export default class Object extends Group {
+  constructor(
+      scene,
+      modelName = 'unknown.rwx',
+      description = '',
+      action = '',
+      pos = new Vector3(0, 0, 0),
+      rot = new Vector3(0, 0, 0),
+      scale = new Vector3(1, 1, 1),
+  ) {
     super();
     this.scene = scene;
-
     this.json = this.scene.json;
 
-    this.parser = new AWActionParser();
+    this.actionParser = new AWActionParser();
+    this.modelName = modelName;
+    this.action = action;
+    this.description = description;
 
-    // Object Data
-    if ($_GET['model']) {
-      this.modelName = Utils.modelName($_GET['model']);
-    } else {
-      this.modelName = Utils.modelName(this.json.object.model);
+    if (this.action !== null) {
+      this.actionResult = this.actionParser.parse(this.action);
     }
-    this.description = $_GET['desc'] || this.json.object.description;
-    this.action = $_GET['action'] || this.json.object.action;
-    this.actionResult = this.parser.parse(this.action);
 
     // Object Data Transforms
     this.objectPosition = this.json.object.position;
@@ -56,9 +60,7 @@ export default class MainObject extends Group {
     this.objectScale[2] = Utils.clampScale(this.objectScale[2]);
 
     // Path Stuff
-    this.path = this.scene.json.path.base;
-    this.path_models = this.path + this.scene.json.path.models;
-    this.path_textures = this.path + this.scene.json.path.textures;
+    this.path = this.scene.json.path;
 
     this.textureEncoding = sRGBEncoding;
     this.loadingManager = new LoadingManager();
@@ -89,9 +91,6 @@ export default class MainObject extends Group {
           MathUtils.degToRad(this.objectRotation[2]),
       );
 
-      // This is not currently implemented in any universe tech,
-      // but is here because I think it would be pretty cool.
-      // It is however a feature in Second Life
       model.scale.set(
           this.objectScale[0],
           this.objectScale[1],
@@ -102,7 +101,7 @@ export default class MainObject extends Group {
       this.axisAlignment = model.userData.rwx.axisAlignment || 'none';
 
       model.userData.desc = this.description;
-      this.execActions(model);
+      if (this.actionResult) this.execActions(model);
       this.add(model);
     });
   }

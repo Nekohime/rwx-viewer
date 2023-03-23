@@ -1,15 +1,10 @@
 {
-  "path": {
-    "base": "http://localhost/3d/path3d/",
-    "models": "rwx",
-    "textures": "textures"
-  },
+  "path": "http://localhost/3d/path3d/",
   "ground": "ground1.rwx",
   "object": {
     "model": "sign5.rwx",
     "description": "Hej!",
-    "action2": "create sign",
-    "action": "",
+    "action": "create sign",
     "position": [0,0,0],
     "rotation": [0,0,0],
     "scale": [1,1,1]
