@@ -1,5 +1,5 @@
 import {Clock, WebGLRenderer, PerspectiveCamera, Scene, Vector3,
-  sRGBEncoding} from 'three';
+  SRGBColorSpace} from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import MainScene from './objects/Scene';
 
@@ -13,7 +13,7 @@ const renderer = new WebGLRenderer({
   alpha: false, // Transparent background
   stencil: false,
 });
-renderer.outputEncoding = sRGBEncoding;
+renderer.outputColorSpace = SRGBColorSpace;
 renderer.shadowMap.enabled = false;
 
 

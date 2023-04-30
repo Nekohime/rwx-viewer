@@ -5,7 +5,7 @@ import * as fflate from 'fflate';
 import {
   Group, Mesh, CanvasTexture,
   LoadingManager,
-  TextureLoader, sRGBEncoding, Color,
+  TextureLoader, SRGBColorSpace, Color,
   VideoTexture, MathUtils, Vector3,
 } from 'three';
 import RWXLoader, {
@@ -62,7 +62,7 @@ export default class Object extends Group {
     // Path Stuff
     this.path = this.scene.json.path;
 
-    this.textureEncoding = sRGBEncoding;
+    this.textureColorSpace = SRGBColorSpace;
     this.loadingManager = new LoadingManager();
     this.materialManager = null;
     this.loader = null;
@@ -108,7 +108,7 @@ export default class Object extends Group {
 
   setRWXLoader(model) {
     this.materialManager = new RWXMaterialManager(this.path + 'textures',
-        '.jpg', '.zip', fflate, false, this.textureEncoding);
+        '.jpg', '.zip', fflate, false, this.textureColorSpace);
     this.loader = (new RWXLoader(this.loadingManager))
         .setRWXMaterialManager(this.materialManager)
         .setPath(this.path + 'rwx').setFlatten(true);
@@ -132,6 +132,7 @@ export default class Object extends Group {
         if (cmd.commandType === 'visible') {
           model.visible = cmd.value;
         } else if (cmd.commandType === 'color') {
+          // BUG: This tints a pictured surface.
           this.applyTexture(model, null, null, cmd.color);
         } else if (cmd.commandType === 'texture') {
           if (cmd.texture) {
@@ -220,8 +221,9 @@ export default class Object extends Group {
   makePicture(item, url) {
     url = `https://images.weserv.nl/?url=${url}`;
     this.pictureLoader = new TextureLoader();
+    this.pictureLoader.textureColorSpace = SRGBColorSpace;
     this.pictureLoader.load(url, (image) => {
-      image.encoding = sRGBEncoding;
+      image.colorSpace = SRGBColorSpace;
       item.traverse((child) => {
         if (child instanceof Mesh) {
           const newMaterials = [];
@@ -229,7 +231,9 @@ export default class Object extends Group {
           if (item.userData.taggedMaterials[pictureTag]) {
             for (const i of item.userData.taggedMaterials[pictureTag]) {
               newMaterials[i] = child.material[i].clone();
+              newMaterials[i].color = new Color(1.0, 1.0, 1.0);
               newMaterials[i].map = image;
+              newMaterials[i].transparent = true;
               newMaterials[i].needsUpdate = true;
             }
           }
@@ -272,7 +276,7 @@ export default class Object extends Group {
             newMaterials[i] = child.material[i].clone();
             newMaterials[i].color = new Color(1, 1, 1);
             newMaterials[i].map = videoTexture;
-            newMaterials[i].map.encoding = sRGBEncoding;
+            newMaterials[i].map.colorSpace = SRGBColorSpace;
           }
         } else {
           if (item.userData.taggedMaterials[pictureTag]) {
@@ -280,7 +284,7 @@ export default class Object extends Group {
               newMaterials[i] = child.material[i].clone();
               newMaterials[i].color = new Color(1, 1, 1);
               newMaterials[i].map = videoTexture;
-              newMaterials[i].map.encoding = sRGBEncoding;
+              newMaterials[i].map.textureColorSpace = SRGBColorSpace;
             }
           }
         }
@@ -418,7 +422,7 @@ export default class Object extends Group {
                     bcolor,
                 ),
             );
-            newMaterials[i].map.encoding = sRGBEncoding;
+            newMaterials[i].map.colorSpace = SRGBColorSpace;
           }
         }
         child.material = newMaterials;
@@ -465,7 +469,7 @@ export default class Object extends Group {
 
   applyTexture(item, textureName, maskName, color) {
     const rwxMaterialManager = new RWXMaterialManager(this.path + 'textures',
-        '.jpg', '.zip', fflate, false, this.textureEncoding);
+        '.jpg', '.zip', fflate, false, this.textureColorSpace);
     const promises = [];
     item.traverse((child) => {
       if (child instanceof Mesh) {

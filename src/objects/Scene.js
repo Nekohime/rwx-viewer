@@ -14,20 +14,20 @@ export default class MainScene extends Group {
     // Scene JSON Setup
     this.json = require('../scene.json');
     this.path = this.json.path.base + '/';
-    this.modelName = Utils.modelName(this.json.ground);
+    // this.modelName = Utils.modelName(this.json.ground);
 
     // World Setup
     this.camera = camera;
     this.environment = new Environment();
     this.groundObject = new Object(this, this.json.ground, null, null);
 
-    this.mainObjectName = Utils.modelName(this.json.object.model);
+    this.mainObjectName = Utils.modelName('unknown.rwx');
     this.mainObjectAction = this.json.object.action;
     this.mainObjectDescription = this.json.object.description;
     if ($_GET['model']) this.mainObjectName = Utils.modelName($_GET['model']);
-    if ($_GET['desc']) this.mainObjectDescription = $_GET['desc'];
-    if ($_GET['action']) this.mainObjectAction = $_GET['action'];
-
+    // TODO: Find a better way to handle the + to space thing
+    if ($_GET['desc']) this.mainObjectDescription = $_GET['desc'].replace(/\+/g, ' ');
+    if ($_GET['action']) this.mainObjectAction = $_GET['action'].replace(/\+/g, ' ');
     this.mainObject = new Object(this,
         this.mainObjectName,
         this.mainObjectDescription,
@@ -48,7 +48,7 @@ export default class MainScene extends Group {
     this.groundObject.init();
     this.mainObject.init();
     this.add(this.environment);
-    this.add(this.groundObject);
+    //this.add(this.groundObject);
     this.add(this.mainObject);
   }
 
