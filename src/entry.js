@@ -1,5 +1,5 @@
 import {Clock, WebGLRenderer, PerspectiveCamera, Scene, Vector3,
-  SRGBColorSpace} from 'three';
+  SRGBColorSpace, ColorManagement} from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import MainScene from './objects/Scene';
 
@@ -15,7 +15,6 @@ const renderer = new WebGLRenderer({
 });
 renderer.outputColorSpace = SRGBColorSpace;
 renderer.shadowMap.enabled = false;
-
 
 const controls = new OrbitControls(camera, renderer.domElement);
 camera.position.set(6, 3, 10);

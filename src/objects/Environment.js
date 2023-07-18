@@ -1,6 +1,7 @@
 import {
   Group,
   AmbientLight,
+  DirectionalLight
 } from 'three';
 
 export default class Environment extends Group {
@@ -13,7 +14,10 @@ export default class Environment extends Group {
     // dir.position.set(5, 1, 2);
     // this.dir.position.set(0, 0, 1);
     // dir.target.position.set(0, 0, 0);
-    this.ambi = new AmbientLight(0xFFFFFF);
+    this.ambi = new AmbientLight(0xFFFFFF, 0.6);
+    this.directionalLight = new DirectionalLight(0xffff70, 0.9); // orange-ish?
+    this.directionalLight.position.set(1, 1, 1);
+
     // const hemi = new HemisphereLight(0xffffbb, 0x080820, 0.66);
 
 
@@ -70,6 +74,7 @@ export default class Environment extends Group {
     */
 
     this.add(this.ambi);
+    this.add(this.directionalLight);
   }
   update(delta) {
     /*

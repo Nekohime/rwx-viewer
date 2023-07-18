@@ -47,6 +47,9 @@ export default class Object extends Group {
 
     // Object Data Transforms
     this.objectPosition = this.json.object.position;
+    if (this.modelName.includes("ground")) {
+      this.objectPosition = [0,-1.05,0];
+    }
     this.objectRotation = this.json.object.rotation;
     this.objectScale = this.json.object.scale;
 

@@ -48,7 +48,7 @@ export default class MainScene extends Group {
     this.groundObject.init();
     this.mainObject.init();
     this.add(this.environment);
-    //this.add(this.groundObject);
+    this.add(this.groundObject);
     this.add(this.mainObject);
   }
 
