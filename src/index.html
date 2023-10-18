@@ -148,6 +148,7 @@ const windows = [];
 
 function createWindow(pJSON) {
   let win = document.createElement('div');
+  if ($_GET['hideedit'] === 'true') win.style.display = 'none';
   win.classList.add('window-wrap');
 	//win.classList.add('maximized');
 	//win.id = programID;
@@ -172,7 +173,7 @@ function createWindow(pJSON) {
   let objPropsModel = document.querySelector("#model");
   let objPropsDesc = document.querySelector("#desc");
   let objPropsAction = document.querySelector("#action");
-  let model = $_GET['model'] ?? 'unknown.rwx';
+  let model = $_GET['model'] ?? 'aw-unknown.rwx';
   let desc = $_GET['desc'] ?? '';
   let action = $_GET['action'] ?? '';
   objPropsModel.value = model;
@@ -192,6 +193,7 @@ function createWindow(pJSON) {
 }
  const container = document.querySelector("#container")
  container.appendChild(createWindow(pJSON))
+
 
  document.addEventListener('pointerdown', function (event) {
 	if (event.which === 1) {

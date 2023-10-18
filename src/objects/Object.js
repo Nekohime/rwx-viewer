@@ -6,7 +6,7 @@ import {
   Group, Mesh, CanvasTexture,
   LoadingManager,
   TextureLoader, SRGBColorSpace, Color,
-  VideoTexture, MathUtils, Vector3,
+  VideoTexture, MathUtils,
 } from 'three';
 import RWXLoader, {
   RWXMaterialManager,
@@ -19,51 +19,48 @@ import {AWActionParser} from 'aw-action-parser';
 // import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // import { VRMLLoader } from 'three/addons/loaders/VRMLLoader.js';
 
-import Utils from '../Utils';
-
+import Utils from '../Utils.js';
 
 export default class Object extends Group {
   constructor(
       scene,
-      modelName = 'unknown.rwx',
+      modelName = 'aw-unknown.rwx',
       description = '',
       action = '',
-      pos = new Vector3(0, 0, 0),
-      rot = new Vector3(0, 0, 0),
-      scale = new Vector3(1, 1, 1),
+      pos = [0, 0, 0],
+      rot = [0, 0, 0],
+      scale = [1, 1, 1],
   ) {
     super();
+
     this.scene = scene;
-    this.json = this.scene.json;
+    this.sceneDescription = this.scene.sceneDescription;
 
     this.actionParser = new AWActionParser();
     this.modelName = modelName;
     this.action = action;
     this.description = description;
+    this.objectPosition = pos;
+    this.objectRotation = rot;
+    this.objectScale = scale;
 
     if (this.action !== null) {
       this.actionResult = this.actionParser.parse(this.action);
     }
-
-    // Object Data Transforms
-    this.objectPosition = this.json.object.position;
-    if (this.modelName.includes("ground")) {
-      this.objectPosition = [0,-1.05,0];
+    if (this.modelName.includes('ground')) {
+      // this.objectPosition = [0, , 0];
     }
-    this.objectRotation = this.json.object.rotation;
-    this.objectScale = this.json.object.scale;
-
     // Scripted Transforms
     this.objectAppliedRotation = {speed: {x: 0, y: 0, z: 0}};
     this.objectAppliedMove = {distance: {x: 0, y: 0, z: 0}};
     this.objectAppliedScale = {factor: {x: 1, y: 1, z: 1}};
 
-    this.objectScale[0] = Utils.clampScale(this.objectScale[0]);
-    this.objectScale[1] = Utils.clampScale(this.objectScale[1]);
-    this.objectScale[2] = Utils.clampScale(this.objectScale[2]);
+    this.objectScale.x = Utils.clampScale(this.objectScale.x);
+    this.objectScale.y = Utils.clampScale(this.objectScale.y);
+    this.objectScale.z = Utils.clampScale(this.objectScale.z);
 
     // Path Stuff
-    this.path = this.scene.json.path;
+    this.path = this.scene.path;
 
     this.textureColorSpace = SRGBColorSpace;
     this.loadingManager = new LoadingManager();
@@ -121,7 +118,6 @@ export default class Object extends Group {
     let textured = false;
     let texturing = null;
     const result = this.actionResult;
-    // console.log(result);
     if (result.create != null) {
       for (const cmd of result.create) {
         if (cmd.commandType === 'texture' || cmd.commandType === 'color') {

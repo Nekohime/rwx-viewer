@@ -1,8 +1,9 @@
 {
   "name": "rwx-viewer",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "For those pesky RWX Models. The ones that everyone forgot about.",
   "main": "entry.js",
+  "type": "module",
   "scripts": {
     "start": "npx webpack serve --mode development --host 0.0.0.0 --port 5000",
     "build": "webpack --mode development",
@@ -18,8 +19,9 @@
   "devDependencies": {
     "@babel/core": "^7.14.3",
     "babel-loader": "^8.2.2",
-    "eslint": "^8.28.0",
-    "eslint-plugin-import": "^2.25.4",
+    "eslint": "^8.51.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-vue": "^9.17.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.3.1",
     "webpack": "^5.67.0",
@@ -28,8 +30,6 @@
   },
   "dependencies": {
     "aw-action-parser": "latest",
-    "eslint-config-google": "^0.14.0",
-    "eslint-plugin-vue": "^9.9.0",
     "fflate": "^0.7.4",
     "rxjs": "latest",
     "three": "latest",

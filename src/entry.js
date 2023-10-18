@@ -1,7 +1,7 @@
 import {Clock, WebGLRenderer, PerspectiveCamera, Scene, Vector3,
-  SRGBColorSpace, ColorManagement} from 'three';
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
-import MainScene from './objects/Scene';
+  SRGBColorSpace} from 'three';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import MainScene from './objects/Scene.js';
 
 const canvas = document.querySelector('canvas');
 

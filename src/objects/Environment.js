@@ -1,7 +1,7 @@
 import {
   Group,
   AmbientLight,
-  DirectionalLight
+  DirectionalLight,
 } from 'three';
 
 export default class Environment extends Group {
