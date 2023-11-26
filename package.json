@@ -29,7 +29,7 @@
     "webpack-dev-server": "latest"
   },
   "dependencies": {
-    "aw-action-parser": "latest",
+    "aw-action-parser": "^1.1.11",
     "fflate": "^0.7.4",
     "rxjs": "latest",
     "three": "latest",
