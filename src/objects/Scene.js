@@ -1,10 +1,8 @@
-import {
-  Group, LoadingManager, Vector2, Raycaster,
-} from 'three';
+import {Group, Vector2, Raycaster} from 'three';
 
 import Environment from './Environment.js';
 import Object from './Object.js';
-import Utils from '../Utils.js';
+// import Utils from '../Utils.js';
 // const hasExtensionRegex = /^.*\.[^\\]+$/i;
 
 const stripTrailingSlash = (str) => {
@@ -21,6 +19,7 @@ export default class MainScene extends Group {
       'path': 'http://localhost/3d/path3d/',
       'ground': 'aw-ground1.rwx',
       'groundY': -100, // TODO
+      'groundEnabled': true,
       'object': {
         'model': 'aw-unknown.rwx',
         'description': '',
@@ -29,13 +28,15 @@ export default class MainScene extends Group {
         'rotation': [0, 0, 0], // TODO: URL Override
         'scale': [1, 1, 1], // Use create scale if you need to change in url
       },
+      'imageService': 'https://images.weserv.nl/?url=',
     };
     // World Setup
     this.camera = camera;
     this.environment = new Environment();
-    this.groundEnabled = true;
+    this.imageService = this.sceneDescription.imageService;
+    this.groundEnabled = this.sceneDescription.groundEnabled;
     if ($_GET['groundenabled'] === 'false') {
-      this.groundEnabled = false;
+    this.groundEnabled = false;
     }
 
     this.path = stripTrailingSlash(this.sceneDescription.path) + '/';
@@ -60,11 +61,11 @@ export default class MainScene extends Group {
       );
     }
 
-    this.mainObjectName = Utils.modelName(this.sceneDescription.object.model);
+    this.mainObjectName = this.sceneDescription.object.model;
     this.mainObjectAction = this.sceneDescription.object.action;
     this.mainObjectDescription = this.sceneDescription.object.description;
     if ($_GET['model']) {
-      this.mainObjectName = Utils.modelName($_GET['model']);
+      this.mainObjectName = $_GET['model'];
     }
     // TODO: Find a better way to handle the + to space thing
     if ($_GET['desc']) {
@@ -72,6 +73,7 @@ export default class MainScene extends Group {
     }
     if ($_GET['action']) {
       this.mainObjectAction = $_GET['action'].replace(/\+/g, ' ');
+      // this.mainObjectAction = 'create scale 2'
     }
 
     this.mainObject = new Object(
@@ -83,7 +85,6 @@ export default class MainScene extends Group {
         this.sceneDescription.object.rotation, // Rotation: Array[int, int, int]
         this.sceneDescription.object.scale, // Scale: Array[int, int, int]
     );
-
     // Raycasting Setup
     this.pointer = new Vector2();
     this.raycaster = new Raycaster();
@@ -101,11 +102,9 @@ export default class MainScene extends Group {
   update(delta) {
     this.raycaster.setFromCamera(this.pointer, this.camera);
 
-
     this.environment.update(delta);
-    // speed * timeStamp / 2500
-    if (this.groundEnabled) this.groundObject.update(delta);
-    // speed * timeStamp / 2500
+    // We don't need to update the ground... do we?
+    // if (this.groundEnabled) this.groundObject.update(delta);
     this.mainObject.update(delta);
   }
 }

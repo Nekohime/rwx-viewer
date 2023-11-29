@@ -1,6 +1,3 @@
-// Based on code from https:// github.com/7185/lemuria/blob/dev/src/app/world/object.service.ts
-
-import {forkJoin} from 'rxjs';
 import * as fflate from 'fflate';
 import {
   Group, Mesh, CanvasTexture,
@@ -14,10 +11,16 @@ import RWXLoader, {
   signTag,
 } from 'three-rwx-loader';
 import {AWActionParser} from 'aw-action-parser';
+import formatSignLines, {makeSignHTML, makeSignCanvas} from '../sign-utils.js';
 
 // WIP
 // import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // import { VRMLLoader } from 'three/addons/loaders/VRMLLoader.js';
+
+const unknownObjectName = '_unknown_';
+const unknownObjectAxisAlignment = 'zorienty';
+const maxCanvasWidth = 512;
+const maxCanvasHeight = 512;
 
 import Utils from '../Utils.js';
 
@@ -34,213 +37,266 @@ export default class Object extends Group {
     super();
 
     this.scene = scene;
-    this.sceneDescription = this.scene.sceneDescription;
-
     this.actionParser = new AWActionParser();
-    this.modelName = modelName;
+
+    this.sceneDescription = this.scene.sceneDescription;
+    this.path = this.scene.path;
+    this.imageService = this.scene.imageService || '';
+
+    this.modelName = Utils.modelName(modelName);
     this.action = action;
     this.description = description;
-    this.objectPosition = pos;
-    this.objectRotation = rot;
-    this.objectScale = scale;
 
-    if (this.action !== null) {
-      this.actionResult = this.actionParser.parse(this.action);
-    }
+    this.newPosition = pos;
+    this.newRotation = rot;
+    this.newScale = scale;
+
     if (this.modelName.includes('ground')) {
-      // this.objectPosition = [0, , 0];
+      // this.newPosition = [0, , 0];
     }
-    // Scripted Transforms
-    this.objectAppliedRotation = {speed: {x: 0, y: 0, z: 0}};
-    this.objectAppliedMove = {distance: {x: 0, y: 0, z: 0}};
-    this.objectAppliedScale = {factor: {x: 1, y: 1, z: 1}};
 
-    this.objectScale.x = Utils.clampScale(this.objectScale.x);
-    this.objectScale.y = Utils.clampScale(this.objectScale.y);
-    this.objectScale.z = Utils.clampScale(this.objectScale.z);
-
-    // Path Stuff
-    this.path = this.scene.path;
-
-    this.textureColorSpace = SRGBColorSpace;
     this.loadingManager = new LoadingManager();
     this.materialManager = null;
     this.loader = null;
+
+    this.textureColorSpace = SRGBColorSpace;
+    this.pictureLoader = new TextureLoader();
+    this.pictureLoader.textureColorSpace = SRGBColorSpace;
+
+    this.init();
   }
 
   init() {
+    // Scripted Transforms
+    this.scriptedRotation = {speed: {x: 0, y: 0, z: 0}};
+    this.scriptedMove = {distance: {x: 0, y: 0, z: 0}};
+    this.scriptedScale = {factor: {x: 1, y: 1, z: 1}};
+
+    // Pointless to limit in viewer.
+    // this.newScale.x = Utils.clampScale(this.newScale.x);
+    // this.newScale.y = Utils.clampScale(this.newScale.y);
+    // this.newScale.z = Utils.clampScale(this.newScale.z);
+
     // Utils.modelName normalizes a model's filename into a .rwx
     //  If a given filename has no extension, or is a .zip, (or a .rwx)
     //   It will give us the model's name with the .rwx extension
     //    We can add more conditions to setup new model loaders.
     if (this.modelName.endsWith('.rwx')) {
-      this.setRWXLoader();
+      this.materialManager = new RWXMaterialManager(this.path + 'textures',
+          '.jpg', '.zip', fflate, false, this.textureColorSpace);
+      this.loader = (new RWXLoader(this.loadingManager))
+          .setRWXMaterialManager(this.materialManager)
+          .setPath(this.path + 'rwx').setFlatten(true);
     }
 
     this.loader.load(this.modelName, (model) => {
       model.name = this.modelName;
       // Object Transform Data
       model.position.set(
-          this.objectPosition[0],
-          this.objectPosition[1],
-          this.objectPosition[2],
+          this.newPosition[0],
+          this.newPosition[1],
+          this.newPosition[2],
       );
       model.rotation.set(
-          MathUtils.degToRad(this.objectRotation[0]),
-          MathUtils.degToRad(this.objectRotation[1]),
-          MathUtils.degToRad(this.objectRotation[2]),
+          MathUtils.degToRad(this.newRotation[0]),
+          MathUtils.degToRad(this.newRotation[1]),
+          MathUtils.degToRad(this.newRotation[2]),
       );
 
       model.scale.set(
-          this.objectScale[0],
-          this.objectScale[1],
-          this.objectScale[2],
+          this.newScale[0],
+          this.newScale[1],
+          this.newScale[2],
       );
 
       // Billboard support
       this.axisAlignment = model.userData.rwx.axisAlignment || 'none';
 
       model.userData.desc = this.description;
-      if (this.actionResult) this.execActions(model);
       this.add(model);
+      if (this.action) {
+        try {
+          this.applyActionString(model, this.action);
+        } catch (e) {
+          console.error(e);
+        }
+      }
     });
   }
 
-  setRWXLoader(model) {
-    this.materialManager = new RWXMaterialManager(this.path + 'textures',
-        '.jpg', '.zip', fflate, false, this.textureColorSpace);
-    this.loader = (new RWXLoader(this.loadingManager))
-        .setRWXMaterialManager(this.materialManager)
-        .setPath(this.path + 'rwx').setFlatten(true);
+  /**
+   * Apply action string to the given 3D prop
+   * @param {Object3D} obj3d - 3D asset to apply the action string to.
+   * @param {string} actionString - Content of the action string.
+   */
+  applyActionString(obj3d, actionString) {
+    this.applyActionsRecursive(obj3d, this.actionParser.parse(actionString));
   }
+  /**
+   * Recursively apply parsed action commands to the given 3D prop,
+   * for internal use by {@link applyActionString}
+   * @param {Object3D} obj3d - 3D asset to apply the action string to.
+   * @param {string} actions - Parsed action commands.
+   */
+  applyActionsRecursive(obj3d, actions) {
+    if (obj3d instanceof Group) {
+      // We are dealing with a group, this means we must
+      // perform a recursive call to its children
+      // console.log(actions)
+      for (const child of actions.children) {
+        this.applyActionsRecursive(child, actions);
+      }
 
-  execActions(model) {
-    let textured = false;
-    let texturing = null;
-    const result = this.actionResult;
-    if (result.create != null) {
-      for (const cmd of result.create) {
-        if (cmd.commandType === 'texture' || cmd.commandType === 'color') {
-          textured = true;
-        }
-      }
-      for (const cmd of result.create) {
-        if (cmd.commandType === 'solid') {
-          model.userData.notSolid = !cmd.value;
-        }
-        if (cmd.commandType === 'visible') {
-          model.visible = cmd.value;
-        } else if (cmd.commandType === 'color') {
-          // BUG: This tints a pictured surface.
-          this.applyTexture(model, null, null, cmd.color);
-        } else if (cmd.commandType === 'texture') {
-          if (cmd.texture) {
-            /*
-            cmd.texture =
-              cmd.texture.lastIndexOf('.') !== -1 ?
-              cmd.texture.substring(
-                  0,
-                  cmd.texture.lastIndexOf('.')
-                ) : cmd.texture;
-             */
-            if (cmd.mask) {
-              cmd.mask =
-                cmd.mask.lastIndexOf('.') !== -1 ?
-                cmd.mask.substring(
-                    0,
-                    cmd.mask.lastIndexOf('.'),
-                ) : cmd.mask;
-            }
-          }
-          texturing = this.applyTexture(model, cmd.texture, cmd.mask);
-        }
-        if (!textured) {
-          if (cmd.commandType === 'sign') {
-            this.makeSign(model, cmd.text, cmd.color, cmd.bcolor);
-          }
-          if (cmd.commandType === 'picture') {
-            this.makePicture(model, cmd.resource);
-          }
-          if (cmd.commandType === 'media') {
-            this.makeMedia(model, cmd.resource);
-          }
-        }
-        if (cmd.commandType === 'rotate') {
-          this.objectAppliedRotation.speed = cmd.speed;
-        }
-        if (cmd.commandType === 'move') {
-          this.objectAppliedMove.distance = cmd.distance,
-          this.objectAppliedMove.time = cmd.time;
-        }
-        if (cmd.commandType === 'scale') {
-          this.objectAppliedScale.factor = cmd.factor;
-        }
-      }
-    }
-    if (result.activate != null) {
-      for (const cmd of result.activate) {
-        model.userData.clickable = true;
-        if (cmd.commandType === 'teleport') {
-          // ?????
-          model.userData.teleportClick = cmd.coordinates[0];
-        }
-      }
-    }
-    if (!textured) {
       return;
+    } else if (!(obj3d instanceof Mesh)) {
+      // If the object is neither a Group nor a Mesh, then it's invalid
+      throw new Error('Invalid object type provided for action parsing');
     }
-    if (texturing != null) {
-      // there are textures, we wait for them to load
-      texturing.subscribe(() => {
-        for (const cmd of result.create) {
-          if (cmd.commandType === 'sign') {
-            this.makeSign(model, cmd.text, cmd.color, cmd.bcolor);
-          }
-          if (cmd.commandType === 'picture') {
-            this.makePicture(model, cmd.resource);
-          }
-          if (cmd.commandType === 'media') {
-            this.makeMedia(model, cmd.resource);
-          }
-        }
-      });
-    } else {
-      // color, no need to wait
-      for (const cmd of result.create) {
-        if (cmd.commandType === 'sign') {
-          this.makeSign(model, cmd.text, cmd.color, cmd.bcolor);
-        }
-        if (cmd.commandType === 'picture') {
-          this.makePicture(model, cmd.resource);
+
+
+    // We only care for 'create' actions for the moment.
+    const createActions = actions.create ? actions.create : [];
+
+    if (!actions.create) return;
+    const materials = [];
+
+    let materialChanged = false;
+
+    // This is a placeholder object, nothing to do
+    if (obj3d.name === unknownObjectName) return;
+
+    for (const material of obj3d.material) {
+      if (!material.userData.rwx) {
+        throw new Error('Material is missing RWX metadata');
+      }
+
+      const rwxMaterial = material.userData.rwx.material.clone();
+      const originalSignature = material.name;
+
+      let texture = null;
+      let color = null;
+      let solid = true;
+      let visible = true;
+      let picture = null;
+      let sign = null;
+      let scale = null;
+      let opacity = null;
+
+      for (const action of createActions) {
+        switch (action.commandType) {
+          case 'color':
+            color = [action.color.r / 255.0,
+              action.color.g / 255.0,
+              action.color.b / 255.0];
+            break;
+
+          case 'texture':
+            texture = action;
+            break;
+
+          case 'visible':
+            visible = action.value;
+            break;
+
+          case 'solid':
+            solid = action.value;
+            break;
+
+          case 'picture':
+            picture = action;
+            break;
+
+          case 'sign':
+            sign = action;
+            console.log(obj3d);
+            sign.text = action.text || obj3d.userData.desc;
+            break;
+
+          case 'scale':
+            scale = action;
+            break;
+
+          case 'opacity':
+            opacity = action;
+            break;
+
+          default:
+            // No action, we do nothing.
+            break;
         }
       }
-    }
-  }
 
-  makePicture(item, url) {
-    url = `https://images.weserv.nl/?url=${url}`;
-    this.pictureLoader = new TextureLoader();
-    this.pictureLoader.textureColorSpace = SRGBColorSpace;
-    this.pictureLoader.load(url, (image) => {
-      image.colorSpace = SRGBColorSpace;
-      item.traverse((child) => {
-        if (child instanceof Mesh) {
-          const newMaterials = [];
-          newMaterials.push(...child.material);
-          if (item.userData.taggedMaterials[pictureTag]) {
-            for (const i of item.userData.taggedMaterials[pictureTag]) {
-              newMaterials[i] = child.material[i].clone();
-              newMaterials[i].color = new Color(1.0, 1.0, 1.0);
-              newMaterials[i].map = image;
-              newMaterials[i].transparent = true;
-              newMaterials[i].needsUpdate = true;
-            }
-          }
-          child.material = newMaterials;
-          child.material.needsUpdate = true;
-        }
-      });
-    });
+      if (texture) {
+        rwxMaterial.texture = texture.texture;
+        rwxMaterial.mask = texture.mask;
+      } else if (color) {
+        rwxMaterial.color = color;
+        rwxMaterial.texture = null;
+        rwxMaterial.mask = null;
+      } else {
+        // Nothing.
+      }
+
+      if (scale) obj3d.scale.copy(scale.factor);
+
+      if (opacity) rwxMaterial.opacity = opacity.opacity;
+
+      obj3d.userData.rwx.solid = solid;
+      obj3d.visible = visible;
+      obj3d.userData.invisible = !visible;
+
+      const newSignature = rwxMaterial.getMatSignature();
+
+      if (newSignature != originalSignature) materialChanged = true;
+
+      if (!this.materialManager.hasThreeMaterialPack(newSignature)) {
+        // Material with those properties does not exist yet, we create it
+        this.materialManager.addRWXMaterial(rwxMaterial, newSignature);
+      }
+
+      const lastMatId = materials.length;
+      materials.push(this.materialManager.getThreeMaterialPack(newSignature)
+          .threeMat);
+
+      // Check if we need to apply a picture
+      // and if said picture can be applied here to begin with...
+      if (picture?.resource && obj3d.userData.taggedMaterials[pictureTag]
+          ?.includes(lastMatId)) {
+        const url = this.imageService + picture.resource;
+        // Doing the above ensures us the new array of materials
+        // will be updated, so if a picture is applied:
+        // it will actually be visible
+        materialChanged = true;
+
+        this.pictureLoader.load(url, (image) => {
+          image.colorSpace = SRGBColorSpace;
+
+          materials[lastMatId] = materials[lastMatId].clone();
+          materials[lastMatId].color = new Color(1.0, 1.0, 1.0);
+          materials[lastMatId].map = image;
+          materials[lastMatId].transparent = true;
+          materials[lastMatId].needsUpdate = true;
+        });
+      }
+
+      // Check if we need to apply a sign
+      // and if said sign can be applied here to begin with...
+      if (sign && obj3d.userData.taggedMaterials[signTag]
+          ?.includes(lastMatId)) {
+        materialChanged = true;
+
+        materials[lastMatId] = materials[lastMatId].clone();
+        materials[lastMatId].color = new Color(1.0, 1.0, 1.0);
+        this.writeTextToCanvas(
+            materials[lastMatId],
+            sign.text,
+            sign.color,
+            sign.bcolor,
+        );
+      }
+    }
+
+    if (materialChanged) obj3d.material = materials;
   }
 
   createElementFromHTML(htmlString) {
@@ -297,211 +353,70 @@ export default class Object extends Group {
     item.userData.mediaPlayer = mediaPlayer;
   }
 
-  textCanvas(text, ratio = 1, color, bcolor) {
-    const canvas = document.createElement('canvas');
-    if (ratio > 1.0) {
-      canvas.width = 256;
-      canvas.height = 256 / ratio;
-    } else {
-      canvas.width = 256 * ratio;
-      canvas.height = 256;
-    }
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = `rgb(${bcolor.r},${bcolor.g},${bcolor.b})`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    const fontSizes = [120, 50, 40, 30, 20, 10, 5];
-    let fontIndex = 0;
-
-    const words = text.split(/([ \n])/);
-    let lines = [''];
-    const maxWidth = canvas.width * 0.95;
-    const maxHeight = canvas.height * 0.95;
-
-    ctx.font = `${fontSizes[fontIndex]}px Arial`;
-
-    // TODO: use a proper way to get line height from font size
-    const fontSizeToHeightRatio = 1;
-    let lineHeight = fontSizes[fontIndex] * fontSizeToHeightRatio;
-
-    let curWordIndex = 0;
-
-    let tentativeWord;
-    let tentativeLine;
-
-    while (curWordIndex < words.length) {
-      const curLine = lines.length - 1;
-
-      if (words[curWordIndex] === '\n') {
-        tentativeWord = '';
-      } else {
-        tentativeWord = words[curWordIndex];
-      }
-
-      if (lines[curLine].length > 0) {
-        tentativeLine = lines[curLine] + tentativeWord;
-      } else {
-        tentativeLine = tentativeWord;
-      }
-
-      if (words[curWordIndex] !== '\n' &&
-        ctx.measureText(tentativeLine).width <= maxWidth) {
-        // TODO: use actualBoundingBoxLeft
-        // and actualBoundingBoxRight instead of .width
-
-        // Adding word to end of line
-        lines[curLine] = tentativeLine;
-        curWordIndex += 1;
-      } else if (ctx.measureText(tentativeWord).width <= maxWidth &&
-        lineHeight * (curLine + 1) <= maxHeight) {
-        // Adding word as a new line
-        lines.push(tentativeWord);
-        curWordIndex += 1;
-      } else if (fontIndex < fontSizes.length - 1) {
-        // Retry all with smaller font size
-        fontIndex += 1;
-        ctx.font = `${fontSizes[fontIndex]}px Arial`;
-        lineHeight = fontSizes[fontIndex] * fontSizeToHeightRatio;
-        lines = [''];
-        curWordIndex = 0;
-      } else {
-        // Min font size reached, add word as new line anyway
-        lines.push(tentativeWord);
-        curWordIndex += 1;
-      }
-    }
-
-    lines.forEach((line, i) => {
-      ctx.fillText(
-          line,
-          canvas.width / 2,
-
-          canvas.height / 2 + i * lineHeight -
-          (lines.length - 1) * lineHeight / 2,
-      );
-    });
-
-    return canvas;
+  useHtmlSignRendering() {
+    return false;
   }
-  makeSign(item, text, color, bcolor) {
-    if (text == null) {
-      text = item.userData.desc != null ? item.userData.desc : '';
-    }
-    if (color == null) {
-      color = {
-        r: 255,
-        g: 255,
-        b: 255,
-      };
-    }
-    if (bcolor == null) {
-      bcolor = {
-        r: 0,
-        g: 0,
-        b: 255,
-      };
-    }
 
-    item.traverse((child) => {
-      if (child instanceof Mesh) {
-        const newMaterials = [];
-        newMaterials.push(...child.material);
-        if (item.userData.taggedMaterials[signTag]) {
-          for (const i of item.userData.taggedMaterials[signTag]) {
-            newMaterials[i] = child.material[i].clone();
-            newMaterials[i].color = new Color(1, 1, 1);
-            newMaterials[i].map = new CanvasTexture(
-                this.textCanvas(
-                    text,
-                    newMaterials[i].userData.ratio,
-                    color,
-                    bcolor,
-                ),
-            );
-            newMaterials[i].map.colorSpace = SRGBColorSpace;
-          }
-        }
-        child.material = newMaterials;
-        child.material.needsUpdate = true;
-      }
-    });
+  writeTextToCanvas(material, text = '',
+      textColor = {r: 255, g: 255, b: 255},
+      backgroundColor = {r: 0, g: 0, b: 255}) {
+    const ratio = material.userData?.ratio ? material.userData.ratio : 1.0;
+    const canvas = document.createElement('canvas');
+    const canvasWidth = ratio > 1 ? maxCanvasWidth : maxCanvasWidth * ratio;
+    const canvasHeight = ratio > 1 ? maxCanvasHeight / ratio : maxCanvasHeight;
+
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    const {r, g, b} = backgroundColor;
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const {lines, fontSize, maxLineWidth} = formatSignLines(text, ctx);
+
+    if (this.useHtmlSignRendering() && this.rasterizeHTML) {
+      // HTML rasterization rendering
+      const {r, g, b} = textColor;
+
+      this.rasterizeHTML.drawHTML(
+          makeSignHTML(lines, fontSize, canvasWidth, canvasHeight, r, g, b),
+          canvas).then(
+          (res) => {
+            material.map = new CanvasTexture(canvas);
+            material.map.colorSpace = SRGBColorSpace;
+            material.needsUpdate = true;
+          },
+          (e) => {
+            console.log(e);
+          },
+      );
+    } else {
+      // Bare canvas rendering
+      const {r, g, b} = textColor;
+
+      makeSignCanvas(ctx, lines, fontSize, maxLineWidth, r, g, b);
+      material.map = new CanvasTexture(canvas);
+      material.map.colorSpace = SRGBColorSpace;
+      material.needsUpdate = true;
+    }
   }
 
   update(delta) {
-    // Scripted Rotation
-    if (this.objectAppliedRotation.speed != null) {
-      this.rotation.set(
-          this.rotation.x +=
-            MathUtils.degToRad(this.objectAppliedRotation.speed.x * 6) * delta,
-          this.rotation.y +=
-            MathUtils.degToRad(this.objectAppliedRotation.speed.y * 6) * delta,
-          this.rotation.z +=
-            MathUtils.degToRad(this.objectAppliedRotation.speed.z * 6) * delta,
-      );
-    }
-    // Scripted Move / Position Change
-    // Warning: Does not stop.
-    if (this.objectAppliedMove.distance != null) {
-      this.position.set(
-          this.position.x += this.objectAppliedMove.distance.x * 6 * delta,
-          this.position.y += this.objectAppliedMove.distance.y * 6 * delta,
-          this.position.z += this.objectAppliedMove.distance.z * 6 * delta);
-    }
     // Scripted Scaling
-    if (this.objectAppliedScale.factor) {
+    if (this.scriptedScale.factor) {
       this.scale.set(
-          this.objectAppliedScale.factor.x,
-          this.objectAppliedScale.factor.y,
-          this.objectAppliedScale.factor.z,
+          this.scriptedScale.factor.x,
+          this.scriptedScale.factor.y,
+          this.scriptedScale.factor.z,
       );
     }
+    // Imperfect, but simple.
     if (this.axisAlignment !== 'none') {
       this.rotation.y = Math.atan2(
           (this.scene.camera.position.x - this.position.x),
           (this.scene.camera.position.z - this.position.z),
       );
     }
-  }
-
-  applyTexture(item, textureName, maskName, color) {
-    const rwxMaterialManager = new RWXMaterialManager(this.path + 'textures',
-        '.jpg', '.zip', fflate, false, this.textureColorSpace);
-    const promises = [];
-    item.traverse((child) => {
-      if (child instanceof Mesh) {
-        const newMaterials = [];
-        child.material.forEach((m) => {
-          if (m.userData.rwx.material != null) {
-            const newRWXMat = m.userData.rwx.material.clone();
-            newRWXMat.texture = textureName;
-            newRWXMat.mask = maskName;
-            if (color != null) {
-              newRWXMat.color = [
-                color.r / 255.0, color.g / 255.0, color.b / 255.0,
-              ];
-            }
-            const signature = newRWXMat.getMatSignature();
-            rwxMaterialManager.addRWXMaterial(newRWXMat, signature);
-            const curMat = rwxMaterialManager.getThreeMaterialPack(signature);
-
-            newMaterials.push(curMat.threeMat);
-            promises.push(forkJoin(curMat.loadingPromises));
-          }
-          if (m.alphaMap != null) {
-            m.alphaMap.dispose();
-          }
-          if (m.map != null) {
-            m.map.dispose();
-          }
-          m.dispose();
-        });
-        child.material = newMaterials;
-        child.material.needsUpdate = true;
-      }
-    });
-    return forkJoin(promises);
   }
 }

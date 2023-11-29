@@ -2,6 +2,8 @@
 
 Model Viewer for RenderWare Script (RWX) files with extensions from a Metaverse program from the 90s!
 
+* Note: The Viewer is undergoing a partial rewrite at the moment
+
 ## How to Use
 
 * Rename or copy `./src/scene.example.json` to `./src/scene.json`, then change values.
@@ -41,5 +43,4 @@ This project makes use of:
 
 * [aw-action-parser (MIT)](https://github.com/Heldroe/aw-action-parser/blob/main/LICENSE)
 * [three-rwx-loader (MIT)](https://github.com/Blaxar/three-rwx-loader)
-* And code from [Lemuria (MIT)!](https://github.com/7185/lemuria)
-* [rxjs (Apache 2.0)](https://github.com/ReactiveX/rxjs/blob/master/LICENSE.txt)
+* And code from [WideWorlds (MIT)!](https://github.com/Blaxar/WideWorlds)
