@@ -9,7 +9,7 @@ module.exports = {
   entry: ['./src/entry.js'],
   output: {
     path: path.join(__dirname, buildPath),
-    filename: '[name].[fullhash].js'
+    filename: '[name].js'
   },
   resolve: {
     symlinks: true
