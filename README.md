@@ -1,8 +1,6 @@
 # RWX Viewer
 
-Model Viewer for RenderWare Script (RWX) files with extensions from a Metaverse program from the 90s!
-
-* Note: The Viewer is undergoing a partial rewrite at the moment
+Model Viewer for RenderWare Script (RWX) files with extensions from a Virtual Worlds program from the 90s!
 
 ## How to Use
 
@@ -22,20 +20,15 @@ Model Viewer for RenderWare Script (RWX) files with extensions from a Metaverse 
 
 ## Features
 
-* Create: Color, Texture, Picture, Sign, Move (moves forever), Rotate, Scale, Visible, Media (click to play/pause)
+* Color, Texture, Picture, Sign, Move (moves forever), Rotate, Scale, Visible, ~~Media (click to play/pause)~~, Opacity
 * Ground
 * Environment (Partially)
   * Lighting
 
 Planned:
 
-* Interactivity, Opacity, Animated Textures, Skyboxes
-
-Maybe:
-
+* Animated Textures, Skyboxes
 * Shear
-* Terrain
-* Clouds, Fog
 
 ## Licenses
 

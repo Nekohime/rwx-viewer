@@ -16,7 +16,7 @@ export default class MainScene extends Group {
     super();
     // JSON Scene Description Setup
     this.sceneDescription = {
-      'path': 'http://localhost/3d/path3d/',
+      'path': 'https://3d.nekohime.net/vwop/',
       'ground': 'aw-ground1.rwx',
       'groundY': -100, // TODO
       'groundEnabled': true,
